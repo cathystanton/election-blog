@@ -2,12 +2,9 @@
 title: Home
 ---
 
-[<img src="https://simpleicons.org/icons/github.svg" style="max-width:15%;min-width:40px;float:right;" alt="Github repo" />](https://github.com/yihui/hugo-xmin)
-
 # FORECASTING THE 2024 U.S. GENERAL ELECTION
 
 ## Catherine Stanton, GOV 1347 @ Harvard College
-
 
 
 ```bash
