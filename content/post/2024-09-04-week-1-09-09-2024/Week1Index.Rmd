@@ -1,3 +1,11 @@
+---
+author: Cathy Stanton
+categories: blog-posts
+date: "2024-09-09"
+slug: week-1-9-09
+title: Blog Post\: Week of 9/09/2024
+---
+
 #' @title GOV 1347: Introductory Blog Post/Laboratory Session
 #' @author Matthew E. Dardet
 #' @date September 4, 2024
