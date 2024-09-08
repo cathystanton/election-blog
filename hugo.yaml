@@ -4,7 +4,7 @@ title: "GOV 1347: Election Analytics Blog"
 theme: "hugo-xmin"
 googleAnalytics: ""
 disqusShortname: ""
-ignoreFiles: ["\\.Rmd$", "\\.Rmarkdown$", "_cache$"]
+ignoreFiles: ["\\.Rmd$", "_cache$"]
 footnotereturnlinkcontents: "↩"
 
 permalinks:
