@@ -9,4 +9,16 @@ title: Home
 | CONTENTS                                                                  |
 |-------------------------------------------------------------------------: |
 | Week 1                                                                    |
-|In this blog post, I explore the impact of a poll's sponsor on             | |its prediction. Specifically, I'm interested in seeing if the results of   | |polls sponsored by newspapers/media organizations differ from the results  | |of unsponsored polls (e.g. polls run completely by pollsters).             |  
+|In this blog post, I explore the impact of a poll's sponsor on its         | |prediction. Specifically, I'm interested in seeing if the results of polls | |sponsored by newspapers/media organizations differ from the results        | |of unsponsored polls (e.g. polls run completely by pollsters).             |
+
++---------------------------------------------------------------------------+
+                                  CONTENTS
++-------------------+--------------------------------------------+----------+
+| Week              | Description                                           |
++===================+=======================================================+
+| [1]()             | In this blog post, I explore the impact of a poll's   |
+                    | sponsor on its prediction. Specifically, I'm          |
+                    | interested in seeing if the results of unsponsored    |
+                    | polls differ from those sponsored by news/media       |
+                    | outlets like Reuters or the New York Times.           |
++-------------------+--------------------------------------------+----------+
