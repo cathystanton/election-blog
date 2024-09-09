@@ -10,13 +10,13 @@ tags: []
 <h1>Week 1: September 9, 2024</h1>
 This blog is an ongoing project for Professor Ryan Enos' Election Analytics Course at Harvard College (GOV 1347, Fall 2024). It will be updated weekly with posts analyzing how different features impact the likelihood of Kamala Harris (D) or Donald Trump (R) winning the 2024 U.S. Presidential Election or winning specific states in the election. The blog will culminate in a final predictive model for the outcome of the general election. Some posts, such as this one, will examine the state of existing polls and try to explain variation between them.
 
-####Question
+<h2>Question</h2>
 While keeping up with predictions for the upcoming presidential election and making my own, I find myself float towards newspapers and media outlets. I consider myself an avid consumer of journalism, and find newspapers reliable for updated polling information. But I know that this is not true of all individuals in the electorate. In this post, I wonder if events that make headlines matter as much to voters as they do to polling agencies. That is, are pollsters are justified when they survey the electorate after a major event, or do the events reported on impact the views of their populations less than it impacted their thoguht processes. I'd imagine that polls sponsored by news organizations tend to undergo updates after *those same* news organizations publish major stories, so I'd like to see if sponsored polls yield similar results to each other.
 
-####The Data
+<h2>The Data</h2>
 The New York Times' 2024 Election Poll Tracker is updated daily with predictions for candidate performance based on aggregate results from of nation-wide and state-specific surveys. The surveys it uses are collected and displayed in a table on the poll tracker's website. I scraped these surveys from the Times' website into a JSON file with fields such as the pollster's name, whether the poll had any sponsorship, and the poll's results. Then I wrote a simple Python script to convert the JSON file into a CSV format (election-blog/jsontocsv.py) Then I looked for differences in the estimates of polls sponsored by external agencies/organizations versus those not sponsored at all. In a future analysis, I hope to compare polls sponsored by news outlets to polls sponsored by other organizations (e.g. colleges, universities), but due to the limited sample size (The New York Times only provided 50 polls because it did not include any polls that began earlier than August 6, 2024. Only 17 of them were sponsored at all) I chose to compare polls sponsored by *any* entity to those run by independent pollsters in this post.
 
-####Methods/Analyses
+<h2>Methods/Analyses</h2>
 
 
 ```r
@@ -224,10 +224,10 @@ hist(unsponsored_margins, main="Histogram of Democratic Lead in Unsponsored Poll
 
 
 
-####Limitations
+<h2>Limitations</h2>
 Since I only compared sponsored polls to non-sponsored polls here, I did not account for the political party of the sponsor organizaton, which would likely explain much of the variance in the polls' results. However, there were only three sponsoring organizations that disclosed any party affiliation in the dataset, so verifying a statistically significant relationship between that affiliation and the similarity of forecasts would be challenging.
 
-####Extension Section
+<h2>Extension Section</h2>
 For a taste of something more predictive about the election itself, rather than explanatory about existing polls, I present *several maps of the U.S. showing which states were considered battleground states over time.* This extension is relevant to the question about polls posed in this post because some of the polls analyzed only address certain states.  
 The data used in this section comes from the GOV 1347 Lab Session on September 4th, 2024. It contains the state-by-state 2-party vote share for every U.S. Presidential Election since 1948. 
 
