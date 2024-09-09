@@ -1,4 +1,4 @@
-baseurl: "https://example.org/"  # please update this to your actual URL
+baseurl: "https://cathystanton.github.io/election-blog/"  # please update this to your actual URL
 languageCode: "en-us"
 title: "GOV 1347: Election Analytics Blog"
 theme: "hugo-xmin"

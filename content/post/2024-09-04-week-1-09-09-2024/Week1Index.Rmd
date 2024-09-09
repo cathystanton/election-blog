@@ -120,13 +120,13 @@ d_pvstate_wide %>%
 
 d_pvstate_wide %>% colnames()
 
-pv2p_2024_states <- d_pv_state_wide %>%
+pv2p_2024_states <- d_pvstate_wide %>%
   filter(year == 2020) %>%
   group_by(state) %>%
   summarize(D_pv2p_2024 = 0.75*D_pv2p + 0.25*D_pv2p_lag1,
             R_pv2p_2024 = 0.75*R_pv2p + 0.25*R_pv2p_lag1) %>%
   mutate(pv2p_2024_margin = R_pv2p_2024 - D_pv2p_2024,
-         region = lower(state))
+         region = tolower(state))
 
 # Plot the margin of victory in a U.S. state map.
 pv2p_2024_states %>%
