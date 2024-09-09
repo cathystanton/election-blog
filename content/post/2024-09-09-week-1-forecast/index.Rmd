@@ -1,8 +1,8 @@
 ---
-title: Week 1 Forecast
+title: Forecast 09/09/2024
 author: Package Build
 date: '2024-09-09'
-slug: week-1-forecast
+slug: forecast-09-09-2024
 categories: []
 tags: []
 ---
@@ -41,7 +41,8 @@ sponsored_polls <- subset(all_nyt_polls, sponsors != '[]')
 independent_polls <- subset(all_nyt_polls, sponsors == '[]')
 
 # explore the sample sizes of sponsored versus non-sponsored polls
-(sponsored_polls$sample_size, independent_polls$sample_size)
+table(sponsored_polls$sample_size)
+table(independent_polls$sample_size)
 
 # is the average sample size significantly different between sponsored and
 # unsponsored polls?
@@ -81,8 +82,8 @@ Finally, I analyze the margins by which sponsored and unsponsored polls predicte
 ```{r}
 sponsored_margins <- table(sponsored_polls$margin)
 unsponsored_margins <- table(independent_polls$margin)
-hist(sponsored_margins, title("Histogram of Democrat Lead in Sponsored Polls"))
-hist(unsponsored_margins, title("Histogram of Democratic Lead in Unsponsored Polls"))
+hist(sponsored_margins, main="Histogram of Democrat Lead in Sponsored Polls", xlab="Democratic Margin", ylab="Count")
+hist(unsponsored_margins, main="Histogram of Democratic Lead in Unsponsored Polls", xlab="Democratic Margin", ylab="Count")
 ```
 
 
@@ -130,3 +131,4 @@ d_pvstate_wide %>%
 ```
 
 In this chart, states are colored based on how different their Democratic margin was from the previous election. So states with extremely strong red or blue fillings are considered battleground states, and states in the middle (purple/pink) are considered predictable from the last election. Some notable battleground states to come out of this plot are: Alabama and Mississippi in the 1964-1976 elections. This is notable because Alabama and Mississippi are now widely regarded as strong "red states." However, the 1980 election was when Ronald Reagan was elected president, and coincides with the rise of the "New Right," which likely cemented Alabama and Mississippi's positions. Some additional battleground states weere Texas in 1952, 1968, and 1972; and Georgia in 1976. There are also some interesting geographic trends exposed here. For example, in 2000, the Northern Midwest/Plains region (Montana, Wyoming, North and South Dakota, and Iowa) consisted of all battleground states which have become more predictable over time. Only elections since 1952 are displayed because the data goes back until 1948, so for the 1948 election, we did not have a previous 2-party vote share to use in measuring how close the state's race was.
+

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Home on GOV 1347: Election Analytics Blog</title>
+    <link>http://localhost:4321/election-blog/</link>
+    <description>Recent content in Home on GOV 1347: Election Analytics Blog</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Mon, 09 Sep 2024 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:4321/election-blog/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Forecast 09/09/2024</title>
+      <link>http://localhost:4321/election-blog/post/2024/09/09/forecast-09-09-2024/</link>
+      <pubDate>Mon, 09 Sep 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:4321/election-blog/post/2024/09/09/forecast-09-09-2024/</guid>
+      <description>&lt;p&gt;####Week 1: September 9, 2024&#xA;This blog is an ongoing project for Professor Ryan Enos&amp;rsquo; Election Analytics Course at Harvard College (GOV 1347, Fall 2024). It will be updated weekly with posts analyzing how different features impact the likelihood of Kamala Harris (D) or Donald Trump (R) winning the 2024 U.S. Presidential Election or winning specific states in the election. The blog will culminate in a final predictive model for the outcome of the general election. Some posts, such as this one, will examine the state of existing polls and try to explain variation between them.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>2024 Election Blog</title>
+      <link>http://localhost:4321/election-blog/about/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:4321/election-blog/about/</guid>
+      <description>&lt;p&gt;My name is Catherine Stanton and I&amp;rsquo;m a senior at Harvard College studying statistics and government. My professional interests lie in the use of data science for natonal intelligence and cybersecurity, but I&amp;rsquo;m also passionate about American politics, civic education, and electoral accessibility.&lt;/p&gt;&#xA;&lt;p&gt;The purpose of this blog is to post forecasts and models about the 2024 U.S. General Election as a part of Professor Ryan Enos&amp;rsquo; GOV 1347 course. Given that Kamala Harris is the second female candidate to face Donald Trump in the last decade, I&amp;rsquo;m especially interested in models that acknowledge similarities between the Harris and Clinton campaigns and are intentionally designed such that sources of error from 2016 do not reappear in new models.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
