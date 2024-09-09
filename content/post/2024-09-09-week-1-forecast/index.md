@@ -1,13 +1,13 @@
 ---
 title: Forecast 09/09/2024
-author: Package Build
+author: Catherine Stanton
 date: '2024-09-09'
 slug: forecast-09-09-2024
 categories: []
 tags: []
 ---
 
-####Week 1: September 9, 2024
+<h1>Week 1: September 9, 2024</h1>
 This blog is an ongoing project for Professor Ryan Enos' Election Analytics Course at Harvard College (GOV 1347, Fall 2024). It will be updated weekly with posts analyzing how different features impact the likelihood of Kamala Harris (D) or Donald Trump (R) winning the 2024 U.S. Presidential Election or winning specific states in the election. The blog will culminate in a final predictive model for the outcome of the general election. Some posts, such as this one, will examine the state of existing polls and try to explain variation between them.
 
 ####Question
