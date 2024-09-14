@@ -1,0 +1,19 @@
+---
+title: Bonus Edition! Effects of the Debate
+author: Catherine Stanton
+date: '2024-09-11'
+slug: bonus-debate-edition
+categories: []
+tags: []
+---
+
+<h1>Bonus Post! Week of September 16, 2024</h1>  
+This blog is an ongoing project for Professor Ryan Enos' Election Analytics Course at Harvard College (GOV 1347, Fall 2024). It will be updated weekly with posts analyzing how different features impact the likelihood of Kamala Harris (D) or Donald Trump (R) winning the 2024 U.S. Presidential Election or winning specific states in the election. The blog will culminate in a final predictive model for the outcome of the general election.
+
+<h2>Question</h2>
+The 2024 U.S. Presidential Election breaks many precedents, one of which being that a major party's candidate only starting campaigning 107 days before election day. Does this matter, and if so, does it help or hurt the candidate? Some voters have aired the concern that they haven't had enough time to get to know and understand Harris' stance on issues that are important to them. This would suggest that her late entrance on the campaign trail was a disadvantage. However, it's been widely observed that, at least when it comes to the economy, voters are more concerned about short term changes than long. The percent change in Real Disposable Income (RDI) in the last quarter of an incumbent's presidency is a better predictor of their party's success in an upcoming election than is the percent change in RDI over the course of their entire presidency. 
+Of course, this work contributes to the larger question about whether campaigns matter at all, or whether elections are "decided by" features of the socio-economic-political context in which they're conducted.
+
+<h2>The Data</h2>
+
+
