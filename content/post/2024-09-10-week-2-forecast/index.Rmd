@@ -287,5 +287,5 @@ ext_results
 As is evident in the table above, The Yen is much more predictive of incumbent candidate vote share than of challenger vote share. The Yuan is likewise more predictive of incumbent vote share. This is interesting, and somewhat intuitive because because it addresses the phenomenon that many candidates spend their first term in office focused on domestic policy and their second term on foreign policy. If this is well-known in the electorate, it may make voters more cognizant of international exchange rates when voting for an incumbent than when voting for a first-term president.
 
 <h2>Sources</h2>
-Data: [FRED](https://fred.stlouisfed.org/release/tables?rid=17&eid=23340&od=1971-01-04#) by the St. Louis Federal Reserve, Election Dataset provided in GOV 1347.
+Data: <a https://fred.stlouisfed.org/release/tables?rid=17&eid=23340&od=1971-01-04#</a> by the St. Louis Federal Reserve, Election Dataset provided in GOV 1347.  
 On Japanese & U.S. Economic Relations: [The Yen Is Plunging. So Is Japan’s Defense Budget](https://www.nytimes.com/2024/07/08/business/japan-yen-defense-spending.html?searchResultPosition=1)
