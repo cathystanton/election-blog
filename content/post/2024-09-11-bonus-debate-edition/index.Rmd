@@ -14,6 +14,8 @@ This blog is an ongoing project for Professor Ryan Enos' Election Analytics Cour
 The 2024 U.S. Presidential Election breaks many precedents, one of which being that a major party's candidate only starting campaigning 107 days before election day. Does this matter, and if so, does it help or hurt the candidate? Some voters have aired the concern that they haven't had enough time to get to know and understand Harris' stance on issues that are important to them. This would suggest that her late entrance on the campaign trail was a disadvantage. However, it's been widely observed that, at least when it comes to the economy, voters are more concerned about short term changes than long. The percent change in Real Disposable Income (RDI) in the last quarter of an incumbent's presidency is a better predictor of their party's success in an upcoming election than is the percent change in RDI over the course of their entire presidency. 
 Of course, this work contributes to the larger question about whether campaigns matter at all, or whether elections are "decided by" features of the socio-economic-political context in which they're conducted.
 
+LAndmark events in a campaign: debate, convention, "skeleton in the closet" e.g. Access Hollywood
+
 <h2>The Data</h2>
 
 

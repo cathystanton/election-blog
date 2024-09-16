@@ -10,8 +10,149 @@ tags: []
 <h1>Week 2: September 16, 2024</h1>  
 This blog is an ongoing project for Professor Ryan Enos' Election Analytics Course at Harvard College (GOV 1347, Fall 2024). It will be updated weekly with posts analyzing how different features impact the likelihood of Kamala Harris (D) or Donald Trump (R) winning the 2024 U.S. Presidential Election or winning specific states in the election. The blog will culminate in a final predictive model for the outcome of the general election.
 
-<h2>Question</h2>
-How much do campaigns matter? Does it mater when a president *starts* their campaign? 
-LAndmark events in a campaign: debate, convention, "skeleton in the closet" e.g. Access Hollywood
+<h2>Context & Question</h2>
+In his successful 1992 campaign for the U.S. Presidency, Bill Clinton is quoted as saying "it's the economy, stupid." Clinton implied that, in a strong economy, voters would favor an incumbent candidate/party, and vice versa in a weak economy. There are several philosophies about what constitutes a "strong economy." Changes in GDP, in GDP per capita, unemployment rate, and inflation rate are all indicators. In this post, I'm interested in looking at the strength of the U.S. Dollar (USD) relative to the currencies of major trading partners and allies, and seeing if it holds predictive power in presidential elections.  
 
-How does the economy impact a candidate's performance?
+<h2>The Data</h2>
+The Federal Reserve Bank of St. Louis publishes the daily exchange rates between the U.S. dollar and a variety of other currencies. I chose to use data about the Japanese Yen, the Chinese Yuan Renminbi, the British Pound, and the Euro. The amount of data available for each currency is summarized below:
+
+| Currency          | Start of Data    |
+| ----------------- |:----------------:|
+| Japanese Yen      | January 4, 1971  |
+| British Pound     | January 4, 1971  |
+| Chinese Yuan      | January 2, 1981  |
+| Euro              | January 4, 1999  |
+
+I use the Japanese Yen because __. Some additional reasons to use the Yen are carry-trading and the mutual defense agreement between the U.S. and Japan. Carry-trading means that __. Because the Yen has historically had low-to-no interest rates, it has been an attractive choice of currency for U.S. investors to convert to before investing in stocks or bonds. The flipside of this, however, is that changes in the Japanese Yen can send the U.S. economy into turmoil (this happened in the first week of August, 2024 when the __ assigned an interest rate to the Yen for the first time since__). Since the relationship between the Dollar and the Yen has such a stark effect on the state of the U.S. economy, I include it in this investigation of economic predictors of U.S. presidential elections.  
+I use the Chinese Yuan Renminbi because China accounts for the greatest portion of U.S. imports. A strong Yuan might __ and a weak Yuan might __. Further, since China does not operate uner a free market economy, the strength of the Yuan corresponds to the strength of the state. U.S. relations with China have become a partisan issue in the time for which data is available. The liberal view is to keep Chinese imports flowing steadily into the United States to keep the prices of household goods reasonable for __ Americans. A conservative approach is to raise tariffs on Chinese imports, with the hope that they will hurt the Chinese economy and curb the nation's ambition to overtake the U.S. as a __ of influence. 1971 was a landmark year for U.S.-China relations: President Nixon 
+I use the Euro and the British Pound because of the alliances that the U.S. maintains with the United Kingdom (UK) and nations in the European Monetary Union (EMU). The values of their currencies relative to the U.S. dollar __. They also indicate ___.
+
+<h2>Exploratory Analyses</h2>
+<h3>Visualizing Four Currencies Against the Dollar Over Time</h3>
+
+```{r}
+# load libraries
+library(dplyr)
+library(ggplot2)
+
+# load the data
+dollar_to_yen <- read.csv("DEXJPUS.csv")
+dollar_to_yuan <- read.csv("DEXCHUS.csv")
+dollar_to_lb <- read.csv("DEXUSUK.csv")
+dollar_to_euro <- read.csv("DEXUSEU.csv")
+```
+
+As provided, the data for China and Japan reflects the price of a Dollar in Renminbi and Yen, respectively. The data for the EMU and UK reflects the price of a Euro or a Pound, respectively, in USD. To make these consistent, I inverted the metric for the Yuan and Yen. This way, all datasets have a column reflecting the price of a foreign currency in USD. A value less than one indicates that the Dollar is stronger than the other currency; a value above one indicates that the Dollar is weaker.
+
+```{r, warning=F}
+# coerce all exchange rates to numeric
+dollar_to_yen$DEXJPUS <- as.numeric(dollar_to_yen$DEXJPUS)
+dollar_to_yuan$DEXCHUS <- as.numeric(dollar_to_yuan$DEXCHUS)
+dollar_to_lb$DEXUSUK <- as.numeric(dollar_to_lb$DEXUSUK)
+dollar_to_euro$DEXUSEU <- as.numeric(dollar_to_euro$DEXUSEU)
+
+# invert Japan and China Exchange Rates
+dollar_to_yen$DEXUSJP <- 1 / dollar_to_yen$DEXJPUS
+dollar_to_yuan$DEXUSCH <- 1 / dollar_to_yuan$DEXCHUS
+```
+
+```{r, warning = F}
+# visualize the price of each currency in dollars over time
+# aggregate data
+all_currencies <- full_join(dollar_to_yen, dollar_to_lb, by = "DATE") %>%
+                  left_join(dollar_to_yuan, by="DATE") %>%
+                  left_join(dollar_to_euro, by="DATE") %>%
+                  select(!c(DEXCHUS, DEXJPUS)) %>%
+                  # convert to datetime
+                  mutate(DATE = as.Date(DATE))
+
+ggplot(data=all_currencies)+
+  geom_line(mapping=aes(x=DATE, y=DEXUSJP, color = "JAPAN")) +
+  geom_line(mapping=aes(x=DATE, y=DEXUSCH, color = "CHINA")) +
+  geom_line(mapping=aes(x=DATE, y=DEXUSEU, color = "EU")) +
+  geom_line(mapping=aes(x=DATE, y=DEXUSUK, color = "UK")) +
+  ylab("Price in USD") + 
+  xlab("Date") + 
+  ggtitle("Price of Currencies in USD Over Time")
+
+```
+
+The following dataset contains the Democratic and Republican shares of the popular vote and electoral college, as well as the name of the incumbent party, for every election since 1952. It is trimmed to only include elections for which the St. Louis Fed provides data about the value of the USD (i.e., elections since 1972).
+
+```{r}
+# load election data
+election_outcomes <- read.csv("ElectionResults2.csv") %>%
+                     filter(Year > 1971)
+```
+
+The data about USD value over time are roughly continuous between the earliest record and the latest record in 2024. Data about the presidential election outcomes since 1972 are discrete since presidential elections are only held every four years in the U.S. In order to use the value of the Dollar as a predictor of election outcomes, I will define a few aggregate metrics from the data. For each election, the strength of the USD will be summarized in one value of the metric and I'll be able to analyze whether that metric is a reasonable predictor of election outcome.  
+
+<h3>Aggregate Metric 1: Average Value of the USD</h3>
+The first aggregate metric I define is the average value of the U.S. Dollar relative to each of the other four currencies, respectively. I calculate this twice: I calculate the average value of the USD over a four-year period (i.e., the incumbent's entire term), then I calculate the average value over the year leading up to the election. This reflects the finding from Achen and Bartels (2017) that voters tend to prioritize the short-term state of the economy, if they consider economic factors at all when casting a ballot.
+
+```{r}
+# import extra library for formatting
+library(stringr)
+
+# find the average value of USD in the 4 years leading up to each election
+all_currencies$YEAR <- strftime(all_currencies$DATE, format="%Y")
+
+exchange_rates <- c("DEXUSJP", "DEXUSCH", "DEXUSUK", "DEXUSEU")
+new_variables4y <- c("USD4YJP", "USD4YCH", "USD4YUK", "USD4YEU")
+new_variables1y <- c("USD1YJP", "USD1YCH", "USD1YUK", "USD1YEU")
+
+# set up variables for USD value relative to all currencies
+for (i in seq(1,4)) {
+  len <- length(election_outcomes$Year)
+  election_outcomes[[new_variables4y[i]]] <- rep(NA, len)
+  election_outcomes[[new_variables1y[i]]] <- rep(NA, len)
+}
+
+# 4-Year Metric  
+for (i in seq(1,length(election_outcomes$Year))) {
+  year <- election_outcomes$Year[i]
+  # start of Year (year - 4)
+  lowest_date <- year - 4
+  # November 1 of election year
+  highest_date <- as.Date(str_glue("11/01/",year), "%m/%d/%Y")
+  
+  for (j in seq(1,4)) {
+    election_outcomes[[new_variables4y[j]]][i] <- mean(all_currencies[[exchange_rates[j]]][(all_currencies$DATE <= highest_date) & (strftime(all_currencies$DATE, format="%Y") >= lowest_date)], na.rm=TRUE)
+  }
+}
+  
+# 1-Year Metric
+for (i in seq(1,length(election_outcomes$Year))) {
+  year <- election_outcomes$Year[i]
+  # November 1 of election year
+  highest_date <- as.Date(str_glue("11/01/",year), "%m/%d/%Y")
+  
+  for (j in seq(1,4)) {
+    election_outcomes[[new_variables1y[j]]][i] <- mean(all_currencies[[exchange_rates[j]]][(all_currencies$DATE <= highest_date) & (strftime(all_currencies$DATE, format="%Y") >= year)], na.rm=TRUE)
+  }
+}
+```
+
+
+<h3>Aggregate Metric 2: Changes in the USD</h3>
+The second aggregate metric I calculate is the change in value of the USD during an incumbent's term. 
+
+```{r}
+
+```
+
+
+
+<h2>Analysis & Results</h2>
+
+Analyses:
+- For each election year, take the average price of the currency in USD
+- See if incumbents have an advantage when the dollar is strong
+- See if one currency's value is a better predictor of incumbent performance than others'
+- Based on the USD's strength relative to all of the currencies, who will win?
+- Based on the value of the best predictor currency, who will win?
+
+
+<h2>Extension Section</h2>
+
+<h2>Sources</h2>
