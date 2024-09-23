@@ -1,0 +1,275 @@
+---
+title: Week 3 Forecast
+author: Package Build
+date: '2024-09-21'
+slug: week-3-forecast
+categories: []
+tags: []
+---
+
+<h1>Week 3: September 23, 2024</h1>  
+This blog is an ongoing project for Professor Ryan Enos' Election Analytics Course at Harvard College (GOV 1347, Fall 2024). It will be updated weekly with posts analyzing how different features impact the likelihood of Kamala Harris (D) or Donald Trump (R) winning the 2024 U.S. Presidential Election or winning specific states in the election. The blog will culminate in a final predictive model for the outcome of the general election.
+
+<h2>Context & Question</h2>
+Since the 19th century, polls have been conducted to predict the outcomes of U.S. presidential elections. While they ultimately predict a binary outcome (i.e. will candidate A win or lose the election), they usually convey their results in percentages (i.e. what percent of the vote can candidate A expect to receive, what percent chance does candidate A have of victory). Polls do this at both the national level and the state level. The results are publicly disseminated, usually in newspapers. in addition to informing the electorate, they may influence voter behavior or motivation. This post asks whether polls (national or state) that show two candidates close to each other correspond to higher turnout rates and vice versa: whether polls that show one candidate defeating the other by a high margin actually discourage turnout (with voters reasoning that their opinion will not shift the result). If polls do cause turnout rates to change, they may also cause the results they're predicting to flesh out differently (if not every individual polled shows up to vote, then the results they contributed to forecasting will likely vary in reality).  
+In this week's blog post, I analyze a set of presidential polling averages by state from 1968 through 2024 to (1) evaluate whether close polls are associated with higher or lower voter turnout and (2) evaluate whether polls that forecast close races should adjust for turnout in one direction, and polls that forecast landslide results the other. Recognizing that "should" is subjective, I use it to evaluate whether the poll would be more accurate compared to the actual result if adjusted for turnout (high or low).
+
+
+<h2>The Data</h2>
+In this post, I convey polling averages in three datasets. The first contains candidates' polling averages from 1968-2016, the second contains the data from 2020, and the third contains the data from 2024. Each dataset is structured the same. They each contain a mix of nation-wide and state-wide polls and provide a percentage estimate for how much of the vote, in the nation or in the specified state, a candidate will receive. the particular candidate is named in a separate column. There is also a column in which the vote-share estimate is adjusted for national trends, but I choose to focus on the regular, raw percent estimates in this analysis.
+
+```{r, echo=FALSE, include=FALSE}
+# import libraries
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+
+# set working directory
+setwd("~/election-blog/content/post/2024-09-21-week-3-forecast")
+```
+
+```{r}
+# load data--polling averages
+avg_68_16 <- read.csv("pres_pollaverages_1968-2016.csv")
+avg_20 <- read.csv("pres_pollaverages_2020.csv")
+avg_24 <- read.csv("pres_pollaverages_2024.csv")
+```
+
+I obtained a dataset measuring voter turnout from [The U.S. Elections Project.](https://www.electproject.org/election-data/voter-turnout-data) It provides data about the voting-eligible population in each state and what proportion of them actually cast a ballot. The limitation is that the dataset only spans the years 1980-2012. But since the polls in 2016 and 2020 were [notably inaccurate](), this could be a plus. I will build a model based on the results from 1980-2012, then test whether it would have improved prediction in 2016 and 2020. If it did, I will apply the model to 2024 prediction and if not, I will use non-adjusted 2024 polling data to predict the election outcome.
+
+```{r}
+# load and clean turnout data
+turnout <- read.csv("ep_turnout_80_14.csv", header=T)
+colnames(turnout) <- c("Year", "State_Code", "Alpha_Num_State_Code", "State", "Pct_Ballots_Counted", "VEP_H_Office", "VAP_H_Office", "Total_Ballots_Counted", "Highest_Office", "VEP", "VAP", "Pct_Noncitizen", "Prison_Count", "Probation_Count", "Parole_Count", "Ineligible_Felon", "Overseas_Eligible")
+turnout <- turnout[-1, ]
+turnout$Year <- as.numeric(turnout$Year)
+presidential_turnout <- subset(turnout, Year %% 4 == 0)
+```
+
+```{r}
+# merge year, state, pct_estimate, pct_trend_adjusted, Pct_Ballots_Counted
+merged_data <- avg_68_16 %>%
+               select(cycle, state, modeldate, candidate_name, pct_estimate, pct_trend_adjusted) %>%
+               left_join(presidential_turnout %>% select(Year, State, Pct_Ballots_Counted), by=join_by(cycle == Year, state == State)) %>%
+               filter((cycle >= 1980) & (cycle <= 2012))
+
+# remove national polls and NA rows
+merged_data <- merged_data %>%
+               filter(state != "National", Pct_Ballots_Counted != "") %>%
+               na.omit()
+
+merged_data$Pct_Ballots_Counted <- as.numeric(strsplit(merged_data$Pct_Ballots_Counted, "%"))
+```
+
+
+<h2>Methods</h2>
+First, I look to compare polling averages to turnout within each state (in cleaning my data, I removed national polls from the dataset). The plot below shows the relationship between a poll's margin between candidates (i.e. how close/far a candidate is from polling at exactly 50%) and the percentage of eligible individuals who turned out to vote. The points are colored by state in case we can observe a starker relationship in some states than others (e.g. we may expect the difference to be more pronounced in typical battleground states).
+
+```{r}
+# explore: what is the trend between pct_estimate and Pct_Ballots_Counted?
+ggplot(data=merged_data, aes(x=abs(50 - pct_estimate), y= Pct_Ballots_Counted, color=(state))) + 
+  geom_point(show.legend=FALSE) +
+  xlab("Proximity to 50%") + 
+  ylab("Turnout Percentage") + 
+  ggtitle("Polling Margins versus Turnout")
+
+```
+
+Simple model interpretation: statistically significant 
+
+Since the dataset of polling averages contains multiple polls from each election cycle, conducted at various points throughout the cycle, there are multiple values of 'Proximity to 50%' that correspond to one, observed value of voter turnout. This introduces noise, and the number of polls conducted in a given state or election cycle becomes a factor in predicting turnout from the polling average, which is not intentional. To reduce the noise that this introduces, we can use a summary statistic about a candidate's polling trend in each state in each cycle. Here I choose to use the average. In the plot below, I take the average of all polls of a particular state, candidate, and year, and use it as a predictor of turnout. The points are still colored by state. It is worth noting that this plot includes polling averages for both candidates in each election, which is a source of collinearity (in the same election, a higher estimate of vote share for candidate A will necessarily correspond to a lower estimate of vote share for candidate B and vie versa).
+
+
+```{r}
+# clean a dataset that reflects the candidate's polling average over the whole cycle
+yearly_polling_avgs <- merged_data %>%
+                       group_by(state, cycle, candidate_name) %>%
+                       mutate(polling_avg = mean(pct_estimate)) %>%
+                       select(state, cycle, candidate_name, polling_avg, Pct_Ballots_Counted) %>%
+                       distinct()
+colnames(yearly_polling_avgs) <- c("state", "year", "candidate_name", "polling_avg", "turnout")
+
+ggplot(data=yearly_polling_avgs, aes(x=abs(50 - polling_avg), y= turnout, color=(state))) + 
+  geom_point(show.legend=FALSE) +
+  xlab("Proximity to 50%") + 
+  ylab("Turnout Percentage") + 
+  ggtitle("Average Polling Margins versus Turnout")
+```
+
+With 50 states represented, it is difficult to visually discern a relationship between how close a poll is and the turnout observed in its domain. I fit a multiple regression model below to determine if the effects of polling averages are more pronounced in some states than others. For each state, I obtain a coefficient for the extent to which polling averages explain variance in turnout in the elections between 1980 and 2012, and I order them from having the least effect to the most.
+
+```{r, warning = F}
+library(nlme)
+
+longitudinal_model <- lmList(turnout ~ abs(50 - polling_avg) | state, data=yearly_polling_avgs)
+
+coefficients <- summary(longitudinal_model)$coefficients[, , 2][,1]
+
+data.frame(coefficient=sort(abs(coefficients), decreasing=T))
+```
+
+From the multiple regression model above, we can observe that Wisconsin and Missouri show the strongest relationships between polling margins and voter turnout. However, since the relationship is positive, this means that the further away from 50% a candidate is polling (i.e. the less-close an election), the *more* people turn out to vote, which is somewhat counter-intuitive. Below, I graph the polling margins versus turnout rates for Wisconsin and Missouri only, to see this relationship.
+
+```{r}
+ggplot(data=subset(yearly_polling_avgs, state %in% c("Wisconsin", "Missouri")), aes(x=abs(50 - polling_avg), y=turnout, color=state, label=year)) + 
+  geom_point() + 
+  geom_text()
+```
+
+Above, we can see that the abnormally strong coefficients observed for Wisconsin and Missouri are due to a fluke of the dataset! They each only contain two observations of voter turnout, so we do not get a full picture of the relationship between polling average and turnout since 1980.  
+Maine, Alabama, and Tennessee had the next strongest relationships between polling margin and voter turnout, though their coefficients were quite a bit smaller than those of Wisconsin and Missouri, indicating that the data may be more complete. I create the analogous plot for them below to see if that is the case and if we can observe the relationship. 
+
+```{r}
+ggplot(data=subset(yearly_polling_avgs, state %in% c("Maine", "Alabama", "Tennessee")), aes(x=abs(50 - polling_avg), y=turnout, color=state, label=year)) + 
+  geom_point() + 
+  geom_text()
+```
+
+The data for these three states is likewise onyl a subset of what is available since 1980. It is the case that, as more data is available, the coefficient between polling margin and vote share becomes weaker. We can look at a plot of the weakest relationships, in Hawaii and North Dakota, to observe this. 
+
+```{r}
+ggplot(data=subset(yearly_polling_avgs, state %in% c("Hawaii", "North Dakota")), aes(x=abs(50 - polling_avg), y=turnout, color=state, label=year))+ 
+  geom_point() + 
+  geom_text()
+```
+
+Something that this plot illuminates is the impact of state-specific trends/baselines when it comes to voter turnout. In all of the elections represented, Hawaii has a relatively static turnout rate, despite variations in candidate polling margins. Its voter turnout trends may be explained by something unique to the state, that stays constant in the face of different candidates with different polling averages. 
+
+<h2>Results & Prediction</h2>
+
+The original question posed in this post was whether the predicted closeness of an election in a state impacted the result of that state *by* impacting voter turnout. Visually, the trends between polling margin and turnout were not particularly strong, but we can check their statistical significance. Below are the results of a model explaining turnout based on average polling margin, for all states combined (i.e. at the national level).
+
+```{r}
+# investigate the coefficients
+simple_model <- lm(Pct_Ballots_Counted ~ abs(50 - pct_estimate), data=merged_data)
+summary(simple_model)
+```
+
+This analysis shows that, at the national level, polling margin has a very slight impact on voter turnout. It is statistically significant, but the coefficient value of -0.111 conveys a very modest effect. I turn to investigating the state-by-state impacts of polling margin on turnout and print the coefficients and their p-values below:
+
+```{r, warning=F}
+data.frame(coefficient=summary(longitudinal_model)$coefficients[, , 2][,1], pvalue=summary(longitudinal_model)$coefficients[, , 2][,4])
+```
+
+The impacts of polling margin on turnout are significant in the following states:  
+* Colorado
+* Delaware
+* D.C.
+* Florida
+* Georgia
+* Idaho
+* Illinois
+* Indiana
+* Iowa
+* Kentucky
+* Maryland
+* Michigan
+* Minnesota
+* Nevada
+* New Jersey
+* New Mexico
+* North Carolina
+* Ohio
+* Oklahoma
+* South Carolina
+* Tennessee
+* Virginia
+* Washington
+
+To investigate whether polling margins should be adjusted to account for the effect of polls on turnout in these states in order to achieve more accurate election predictions, I will load and clean a dataset of state-level presidential returns from 1976 through 2020 from the MIT Election Data Lab. In this dataset, I removed rows about third-party candidates or write-in candidates to be more consistent with the polling averages datasets.
+
+```{r}
+election_returns <- read.csv("1976-2020-president.csv")
+election_returns <- election_returns %>%
+                    filter(party_simplified %in% c("DEMOCRAT", "REPUBLICAN"), year >= 1980, year <= 2012) %>%
+                    mutate(pct_received = candidatevotes/totalvotes)
+```
+
+Now, I would like to see how far off the polling averages were from the actual election returns for each of the 23 states that showed a significant relationship between polling margin and voter turnout, between 1980 and 2012.
+
+```{r}
+library(stringr)
+yearly_polling_avgs$state <- toupper(yearly_polling_avgs$state)
+yearly_polling_avgs <- yearly_polling_avgs %>%
+                       mutate(candidate_name = case_when(candidate_name == "Barack Obama" ~ "OBAMA, BARACK H.",
+                                                         candidate_name == "Mitt Romney" ~ "ROMNEY, MITT",
+                                                         candidate_name == "John McCain" ~ "MCCAIN, JOHN",
+                                                         candidate_name == "George W. Bush" ~ "BUSH, GEORGE W.",
+                                                         candidate_name == "John Kerry" ~ "KERRY, JOHN", 
+                                                         candidate_name == "Al Gore" ~ "GORE, AL", 
+                                                         candidate_name == "Bill Clinton" ~ "CLINTON, BILL", 
+                                                         candidate_name == "Bob Dole" ~ "DOLE, ROBERT", 
+                                                         candidate_name == "George Bush" ~ "BUSH, GEORGE H. W.",
+                                                         candidate_name == "Michael S. Dukakis" ~ "DUKAKIS, MICHAEL", 
+                                                         candidate_name == "Ronald Reagn" ~ "REAGAN, RONALD", 
+                                                         candidate_name == "Walter F. Mondale" ~ "MONDALE, WALTER", 
+                                                         candidate_name == "Jimmy Carter" ~ "CARTER, JIMMY"))
+
+joint_data <- yearly_polling_avgs %>%
+              left_join(election_returns, by=join_by(year, state, candidate_name == candidate)) %>%
+              select(!c("state_fips", "state_cen", "state_ic", "office", "writein", "version", "notes", "party_detailed")) %>%
+              na.exclude()
+```
+
+```{r, warning = F}
+# plot the amount by which polls were off from reality in the 23 states
+filter_data <- joint_data %>%
+               filter(state %in% c("COLORADO", "DELAWARE", "DISTRICT OF COLUMBIA", "FLORIDA", "GEORGIA", "IDAHO", "ILLINOIS", "INDIANA", "IOWA", "KENTUCKY", "MARYLAND", "MICHIGAN", "MINNESOTA", "NEVADA", "NEW JERSEY", "NEW MEXICO", "NORTH CAROLINA", "OHIO", "OKLAHOMA", "SOUTH CAROLINA", "TENNESSEE", "VIRGINIA", "WASHINGTON"))
+
+filter_data$index <- seq(1, nrow(filter_data))
+
+ggplot(data=filter_data, aes(x=index, y=(pct_received-(polling_avg/100)), label=index)) +
+  geom_point() + 
+  geom_text(position=position_jitter(0.01, 0.1)) +
+  ylab("Difference in Polling and Vote Share") +
+  xlab("Index") +
+  ggtitle("Elections with the Greatest Polling and Outcome Differences")
+
+```
+
+The outliers on the plot above represent elections in which the polling estimates were significantly different than the real outcomes. Elections were numbered with an index in the dataset, which is where the numbers on the plot come from. Since the dataset has data about how both candidates in each election performed in the polls, we notice that there are multiple points for the same election here, and it makes sense that their errors would be plotted on opposite sides of '0' because an over-estimate for one candidate guarantees an under-estimate for another. The races with the biggest discrepancies were:
+
+```{r}
+widest_differences <- filter_data %>%
+                        mutate(diff = abs(pct_received-(polling_avg/100))) %>%
+                        arrange(desc(diff)) %>%
+                        select(state, year, candidate_name, turnout, diff, polling_avg) %>%
+                        filter(diff >= 0.05)
+```
+
+Each of the races in the dataframe above showed a 5-point or more difference between the candidate's polling average and their actual vote share in the specified state. There are 47 races represented but 94 rows because, when one candidate polls higher-than-expected, their opponent polls lower-than-expected, and both are counted as errors in this analysis.
+
+Based on these outcomes, I create a set of weights by which to multiply the polling averages, to get them as close as possible to the true outcomes. Then I test whether the weights can be applied to improve predictions for the elections in these states in 2016 and 2020. If they do improve predictions, I will incorporate them into a prediction of the 2024 election based on polling, and if not I will exclude them.
+
+```{r}
+# creating the weights -- minimize `diff` in a given state
+widest_differences %>% arrange(state, year)
+
+```
+
+
+- an alternative adjustment would be to weight based on turnout. But since turnout was not clearly explained by polls earlier in this analysis, I chose not to. 
+- One of the datasets provided weighted polls based on national trends. This could be likened to weighting based on turnout, since it appears that there are other explanatory variables that cause a state's turnout rate to remain relatively constant/at some baseline level from year-to-year.
+
+Applying what we found to make a forecast of the 2024 election, I will adjust __ and __ for expected turnout. Here are the state-by-state 
+
+```{r}
+avg_24 <- subset(avg_24, !is.na(pct_estimate))
+```
+
+
+<h2>Extension Section</h2>
+
+follow-up questions: what would happen if we had data showing how a candidate was polling in a time span greater than just the election year? 2 years before? Retrospection would suggest the earlier polls don't matter as much, but what if measuring a candidate's fluctuation/variance proved to be a good predictor of turnout? if a lot of people care enough to change their minds/meaningfully alter the polls, they might be more inlcined to vote?
+
+in a future analysis, we could just take states' baseline levels of turnout and account for those, rather than projecting turnout from polls
+
+this teaches us that this is a technique that can be applied to __ in the future. However it should be noted that it is most effective in states where turnout rates are variable and likely influenced by polls. It should also be noted that the concept of tunrout being effected by a poll is relatively recent--it was not super easy to disseminate poll before the age of the internet, so this is a relatively new capability. we use the election of 1980, but that was pre-internet and so the idea of ever-updating polls influencing voter behavior didn't exist.
+
+
+<h2>Sources</h2>
+The Election Project
+MIT Election Data Lab
+
+
+
