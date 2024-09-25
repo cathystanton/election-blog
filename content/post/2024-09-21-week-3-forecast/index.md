@@ -1,5 +1,5 @@
 ---
-title: Week 3 Forecast
+title: Forecast 09/21/2024
 author: Package Build
 date: '2024-09-21'
 slug: week-3-forecast
@@ -41,20 +41,6 @@ presidential_turnout <- subset(turnout, Year %% 4 == 0)
 ```
 
 
-```r
-# merge year, state, pct_estimate, pct_trend_adjusted, Pct_Ballots_Counted
-merged_data <- avg_68_16 %>%
-               select(cycle, state, modeldate, candidate_name, pct_estimate, pct_trend_adjusted) %>%
-               left_join(presidential_turnout %>% select(Year, State, Pct_Ballots_Counted), by=join_by(cycle == Year, state == State)) %>%
-               filter((cycle >= 1980) & (cycle <= 2012))
-
-# remove national polls and NA rows
-merged_data <- merged_data %>%
-               filter(state != "National", Pct_Ballots_Counted != "") %>%
-               na.omit()
-
-merged_data$Pct_Ballots_Counted <- as.numeric(strsplit(merged_data$Pct_Ballots_Counted, "%"))
-```
 
 
 <h2>Methods</h2>
@@ -99,83 +85,6 @@ ggplot(data=yearly_polling_avgs, aes(x=abs(50 - polling_avg), y= turnout, color=
 With 50 states represented, it is difficult to visually discern a relationship between how close a poll is and the turnout observed in its domain. I fit a multiple regression model below to determine if the effects of polling averages are more pronounced in some states than others. For each state, I obtain a coefficient for the extent to which polling averages explain variance in turnout in the elections between 1980 and 2012, and I order them from having the least effect to the most.
 
 
-```r
-library(nlme)
-```
-
-```
-## 
-## Attaching package: 'nlme'
-```
-
-```
-## The following object is masked from 'package:dplyr':
-## 
-##     collapse
-```
-
-```r
-longitudinal_model <- lmList(turnout ~ abs(50 - polling_avg) | state, data=yearly_polling_avgs)
-
-coefficients <- summary(longitudinal_model)$coefficients[, , 2][,1]
-
-data.frame(coefficient=sort(abs(coefficients), decreasing=T))
-```
-
-```
-##                       coefficient
-## North Carolina       2.138504e-01
-## Georgia              2.124286e-01
-## Colorado             2.008285e-01
-## Iowa                 1.957581e-01
-## Virginia             1.893230e-01
-## Delaware             1.606083e-01
-## Florida              1.565245e-01
-## Ohio                 1.333449e-01
-## Arkansas             1.295336e-01
-## Maryland             1.226265e-01
-## Minnesota            1.224102e-01
-## Nevada               1.175494e-01
-## New Mexico           1.167269e-01
-## Maine                1.053145e-01
-## Washington           1.030583e-01
-## Kentucky             1.027020e-01
-## South Carolina       1.012450e-01
-## Michigan             9.753316e-02
-## District of Columbia 9.627183e-02
-## New Jersey           9.370570e-02
-## Indiana              8.767767e-02
-## Arizona              8.135182e-02
-## Tennessee            7.788782e-02
-## New Hampshire        7.014599e-02
-## South Dakota         6.403875e-02
-## Louisiana            6.151298e-02
-## Massachusetts        5.895584e-02
-## West Virginia        5.593102e-02
-## Illinois             4.939704e-02
-## California           4.834636e-02
-## New York             4.818020e-02
-## Rhode Island         4.769034e-02
-## Nebraska             4.659975e-02
-## Utah                 4.372206e-02
-## Alabama              4.352011e-02
-## Kansas               3.968522e-02
-## Oregon               3.515755e-02
-## Connecticut          3.271554e-02
-## Alaska               3.044356e-02
-## Wyoming              2.873629e-02
-## Wisconsin            2.809571e-02
-## Vermont              2.352613e-02
-## Hawaii               1.620779e-02
-## Missouri             1.236463e-02
-## Oklahoma             8.932723e-03
-## Montana              7.643676e-03
-## Idaho                2.010398e-03
-## North Dakota         1.409148e-03
-## Pennsylvania         1.522823e-15
-## Texas                2.719539e-16
-## Mississippi          2.439426e-17
-```
 
 From the multiple regression model above, we can observe that North Carolina, Georgia, and Colorado show the strongest relationships between polling margins and voter turnout. These relationships are slight but positive, meaning that the further away from 50% a candidate is polling, the (i.e. the less-close an election), the *more* people turn out to vote, which is somewhat counter-intuitive. Again, the relationship is subtle with a correlation coefficient well below 1. Below, I graph the polling margins versus turnout rates for these three states only, to see this relationship.
 
@@ -236,64 +145,6 @@ summary(simple_model)
 This analysis shows that, at the national level, polling margin has a very slight impact on voter turnout. It is statistically significant, but the coefficient value of -0.111 conveys a very modest effect. I turn to investigating the state-by-state impacts of polling margin on turnout and print the coefficients and their p-values below:
 
 
-```r
-data.frame(coefficient=summary(longitudinal_model)$coefficients[, , 2][,1], pvalue=summary(longitudinal_model)$coefficients[, , 2][,4]) %>% arrange(pvalue, asc=T)
-```
-
-```
-##                        coefficient      pvalue
-## Georgia              -2.124286e-01 0.009383362
-## Virginia             -1.893230e-01 0.010898729
-## Iowa                 -1.957581e-01 0.031235533
-## Colorado             -2.008285e-01 0.031927165
-## North Carolina       -2.138504e-01 0.032975773
-## Florida              -1.565245e-01 0.034953566
-## Ohio                 -1.333449e-01 0.054746937
-## Maryland             -1.226265e-01 0.055433964
-## Delaware             -1.606083e-01 0.064309292
-## South Carolina       -1.012450e-01 0.070105114
-## Nevada               -1.175494e-01 0.078515097
-## New Mexico           -1.167269e-01 0.083684411
-## Minnesota            -1.224102e-01 0.085613644
-## Washington           -1.030583e-01 0.150206151
-## Michigan             -9.753316e-02 0.177662121
-## Indiana              -8.767767e-02 0.189494620
-## New Jersey           -9.370570e-02 0.201028724
-## Kentucky             -1.027020e-01 0.213906554
-## Arizona              -8.135182e-02 0.255484892
-## New Hampshire        -7.014599e-02 0.284073679
-## Massachusetts        -5.895584e-02 0.394486904
-## Tennessee            -7.788782e-02 0.425395586
-## Louisiana            -6.151298e-02 0.431068749
-## Illinois             -4.939704e-02 0.466699553
-## New York             -4.818020e-02 0.496687320
-## Nebraska             -4.659975e-02 0.515096265
-## California           -4.834636e-02 0.521576338
-## West Virginia        -5.593102e-02 0.546191091
-## South Dakota         -6.403875e-02 0.549593170
-## District of Columbia -9.627183e-02 0.583168392
-## Kansas               -3.968522e-02 0.589350724
-## Rhode Island         -4.769034e-02 0.599877038
-## Oregon               -3.515755e-02 0.600506602
-## Utah                 -4.372206e-02 0.607752824
-## Arkansas             -1.295336e-01 0.634330800
-## Connecticut           3.271554e-02 0.691191431
-## Alaska                3.044356e-02 0.740506324
-## Vermont              -2.352613e-02 0.759900542
-## Maine                -1.053145e-01 0.762982759
-## Wyoming               2.873629e-02 0.786265161
-## Hawaii               -1.620779e-02 0.825458780
-## Oklahoma              8.932723e-03 0.908215155
-## Alabama               4.352011e-02 0.920849594
-## Montana              -7.643676e-03 0.926773792
-## Wisconsin             2.809571e-02 0.976029643
-## Idaho                -2.010398e-03 0.976148673
-## North Dakota         -1.409148e-03 0.983269539
-## Missouri              1.236463e-02 0.987114326
-## Texas                -2.719539e-16 1.000000000
-## Mississippi          -2.439426e-17 1.000000000
-## Pennsylvania         -1.522823e-15         NaN
-```
 
 The impacts of polling margin on turnout are significant in the following states:  
 * Colorado
@@ -333,29 +184,6 @@ election_returns <- election_returns %>%
 Now, I would like to see how far off the polling averages were from the actual election returns for each of the 23 states that showed a significant relationship between polling margin and voter turnout, between 1980 and 2012.
 
 
-```r
-library(stringr)
-yearly_polling_avgs$state <- toupper(yearly_polling_avgs$state)
-yearly_polling_avgs <- yearly_polling_avgs %>%
-                       mutate(candidate_name = case_when(candidate_name == "Barack Obama" ~ "OBAMA, BARACK H.",
-                                                         candidate_name == "Mitt Romney" ~ "ROMNEY, MITT",
-                                                         candidate_name == "John McCain" ~ "MCCAIN, JOHN",
-                                                         candidate_name == "George W. Bush" ~ "BUSH, GEORGE W.",
-                                                         candidate_name == "John Kerry" ~ "KERRY, JOHN", 
-                                                         candidate_name == "Al Gore" ~ "GORE, AL", 
-                                                         candidate_name == "Bill Clinton" ~ "CLINTON, BILL", 
-                                                         candidate_name == "Bob Dole" ~ "DOLE, ROBERT", 
-                                                         candidate_name == "George Bush" ~ "BUSH, GEORGE H. W.",
-                                                         candidate_name == "Michael S. Dukakis" ~ "DUKAKIS, MICHAEL", 
-                                                         candidate_name == "Ronald Reagn" ~ "REAGAN, RONALD", 
-                                                         candidate_name == "Walter F. Mondale" ~ "MONDALE, WALTER", 
-                                                         candidate_name == "Jimmy Carter" ~ "CARTER, JIMMY"))
-
-joint_data <- yearly_polling_avgs %>%
-              left_join(election_returns, by=join_by(year, state, candidate_name == candidate)) %>%
-              select(!c("state_fips", "state_cen", "state_ic", "office", "writein", "version", "notes", "party_detailed")) %>%
-              na.exclude()
-```
 
 
 ```r
@@ -378,13 +206,6 @@ ggplot(data=filter_data, aes(x=index, y=(pct_received-(polling_avg/100)), label=
 The outliers on the plot above represent elections in which the polling estimates were significantly different than the real outcomes. Elections were numbered with an index in the dataset, which is where the numbers on the plot come from. Since the dataset has data about how both candidates in each election performed in the polls, we notice that there are multiple points for the same election here, and it makes sense that their errors would be plotted on opposite sides of '0' because an over-estimate for one candidate guarantees an under-estimate for another. The races with the biggest discrepancies were:
 
 
-```r
-widest_differences <- filter_data %>%
-                        mutate(diff = abs(pct_received-(polling_avg/100))) %>%
-                        arrange(desc(diff)) %>%
-                        select(state, year, candidate_name, turnout, diff, polling_avg, pct_received) %>%
-                        filter(diff >= 0.05)
-```
 
 Each of the races in the dataframe above showed a 5-point or more difference between the candidate's polling average and their actual vote share in the specified state.
 
@@ -406,33 +227,6 @@ weights_df <- data.frame(state = unique(widest_differences$state), weight = weig
 ```
 
 
-```r
-# for 2016 data, check to see if multiplication by the weights brings the estimates closer to reality
-# data cleaning
-data_2016 <- avg_68_16 %>% 
-              filter(cycle == 2016, candidate_name %in% c("Donald Trump", "Hillary Rodham Clinton")) %>%
-              group_by(state, cycle, candidate_name) %>%
-              mutate(polling_avg = mean(pct_estimate) / 100, candidate_name = case_when(candidate_name == "Donald Trump" ~ "TRUMP, DONALD J.", candidate_name == "Hillary Rodham Clinton" ~ "CLINTON, HILLARY"), state = toupper(state)) %>%
-              select(state, cycle, candidate_name, polling_avg) %>%
-              distinct()
-colnames(data_2016) <- c("state", "year", "candidate_name", "polling_avg")
-                  
-election_returns_clean <- read.csv("1976-2020-president.csv")
-merge_2016 <- data_2016 %>%
-                left_join(election_returns_clean, by=join_by(year, state, candidate_name == candidate)) %>%
-                select(!c("state_fips", "state_cen", "state_ic", "office", "writein", "version", "notes", "party_detailed")) %>%
-                na.exclude() %>%
-                filter(state != "National", !(candidatevotes %in% c(259, 78)))
-merge_2016$pct_received = round(merge_2016$candidatevotes/merge_2016$totalvotes, 7)
-
-# filter to 23 elections from above
-filter_2016 <- merge_2016 %>%
-                filter(state %in% c("COLORADO", "DELAWARE", "DISTRICT OF COLUMBIA", "FLORIDA", "GEORGIA", "IDAHO", "ILLINOIS", "INDIANA", "IOWA", "KENTUCKY", "MARYLAND", "MICHIGAN", "MINNESOTA", "NEVADA", "NEW JERSEY", "NEW MEXICO", "NORTH CAROLINA", "OHIO", "OKLAHOMA", "SOUTH CAROLINA", "TENNESSEE", "VIRGINIA", "WASHINGTON"))
-
-effect_of_weights_2016 <- data.frame(state = filter_2016$state, differences = filter_2016$pct_received - filter_2016$polling_avg) %>%
-                            left_join(weights_df, by=join_by(state)) %>%
-                            mutate(differences_with_weights = filter_2016$pct_received - weight*filter_2016$polling_avg)
-```
 
 
 Below are the races for which weighting *improved* the predictions of polling (i.e. made them closer to the actual outcome):

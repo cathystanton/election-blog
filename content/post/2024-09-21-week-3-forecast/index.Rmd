@@ -46,7 +46,7 @@ turnout$Year <- as.numeric(turnout$Year)
 presidential_turnout <- subset(turnout, Year %% 4 == 0)
 ```
 
-```{r}
+```{r, echo=FALSE, include=FALSE}
 # merge year, state, pct_estimate, pct_trend_adjusted, Pct_Ballots_Counted
 merged_data <- avg_68_16 %>%
                select(cycle, state, modeldate, candidate_name, pct_estimate, pct_trend_adjusted) %>%
@@ -98,7 +98,7 @@ ggplot(data=yearly_polling_avgs, aes(x=abs(50 - polling_avg), y= turnout, color=
 
 With 50 states represented, it is difficult to visually discern a relationship between how close a poll is and the turnout observed in its domain. I fit a multiple regression model below to determine if the effects of polling averages are more pronounced in some states than others. For each state, I obtain a coefficient for the extent to which polling averages explain variance in turnout in the elections between 1980 and 2012, and I order them from having the least effect to the most.
 
-```{r, warning = F}
+```{r, warning = F, include=F}
 library(nlme)
 
 longitudinal_model <- lmList(turnout ~ abs(50 - polling_avg) | state, data=yearly_polling_avgs)
@@ -138,7 +138,7 @@ summary(simple_model)
 
 This analysis shows that, at the national level, polling margin has a very slight impact on voter turnout. It is statistically significant, but the coefficient value of -0.111 conveys a very modest effect. I turn to investigating the state-by-state impacts of polling margin on turnout and print the coefficients and their p-values below:
 
-```{r, warning=F}
+```{r, warning=F, include=F}
 data.frame(coefficient=summary(longitudinal_model)$coefficients[, , 2][,1], pvalue=summary(longitudinal_model)$coefficients[, , 2][,4]) %>% arrange(pvalue, asc=T)
 ```
 
@@ -178,7 +178,7 @@ election_returns <- election_returns %>%
 
 Now, I would like to see how far off the polling averages were from the actual election returns for each of the 23 states that showed a significant relationship between polling margin and voter turnout, between 1980 and 2012.
 
-```{r}
+```{r, include=F}
 library(stringr)
 yearly_polling_avgs$state <- toupper(yearly_polling_avgs$state)
 yearly_polling_avgs <- yearly_polling_avgs %>%
@@ -220,7 +220,7 @@ ggplot(data=filter_data, aes(x=index, y=(pct_received-(polling_avg/100)), label=
 
 The outliers on the plot above represent elections in which the polling estimates were significantly different than the real outcomes. Elections were numbered with an index in the dataset, which is where the numbers on the plot come from. Since the dataset has data about how both candidates in each election performed in the polls, we notice that there are multiple points for the same election here, and it makes sense that their errors would be plotted on opposite sides of '0' because an over-estimate for one candidate guarantees an under-estimate for another. The races with the biggest discrepancies were:
 
-```{r}
+```{r, include=F}
 widest_differences <- filter_data %>%
                         mutate(diff = abs(pct_received-(polling_avg/100))) %>%
                         arrange(desc(diff)) %>%
@@ -247,7 +247,7 @@ weights_df <- data.frame(state = unique(widest_differences$state), weight = weig
 
 ```
 
-```{r}
+```{r, include=F}
 # for 2016 data, check to see if multiplication by the weights brings the estimates closer to reality
 # data cleaning
 data_2016 <- avg_68_16 %>% 
@@ -284,7 +284,7 @@ subset(effect_of_weights_2016, abs(differences_with_weights) < abs(differences))
 
 In 2016, 22 states' predictions were improved with the weighting scheme applied. I repeated the same process and then found the races for which the same weighting scheme *improved* the predictions for 2020:
 
-```{r, echo = F}
+```{r, echo = F, include=F}
 # repeat for 2020
 data_2020 <- avg_20 %>% 
               group_by(state, cycle, candidate_name) %>%

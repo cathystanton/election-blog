@@ -3,7 +3,7 @@
   <head><script src="/election-blog/livereload.js?mindelay=10&amp;v=2&amp;port=4321&amp;path=election-blog/livereload" data-no-instant defer></script>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Week 3 Forecast | GOV 1347: Election Analytics Blog</title>
+    <title>Forecast 09/21/2024 | GOV 1347: Election Analytics Blog</title>
     <link rel="stylesheet" href="/election-blog/css/style.css" />
     <link rel="stylesheet" href="/election-blog/css/fonts.css" />
     
@@ -22,7 +22,7 @@
     </nav>
 
 <div class="article-meta">
-<h1><span class="title">Week 3 Forecast</span></h1>
+<h1><span class="title">Forecast 09/21/2024</span></h1>
 <h2 class="author">Package Build</h2>
 <h2 class="date">2024/09/21</h2>
 </div>
@@ -47,19 +47,6 @@ colnames(turnout) &lt;- c(&quot;Year&quot;, &quot;State_Code&quot;, &quot;Alpha_
 turnout &lt;- turnout[-1, ]
 turnout$Year &lt;- as.numeric(turnout$Year)
 presidential_turnout &lt;- subset(turnout, Year %% 4 == 0)
-</code></pre>
-<pre><code class="language-r"># merge year, state, pct_estimate, pct_trend_adjusted, Pct_Ballots_Counted
-merged_data &lt;- avg_68_16 %&gt;%
-               select(cycle, state, modeldate, candidate_name, pct_estimate, pct_trend_adjusted) %&gt;%
-               left_join(presidential_turnout %&gt;% select(Year, State, Pct_Ballots_Counted), by=join_by(cycle == Year, state == State)) %&gt;%
-               filter((cycle &gt;= 1980) &amp; (cycle &lt;= 2012))
-
-# remove national polls and NA rows
-merged_data &lt;- merged_data %&gt;%
-               filter(state != &quot;National&quot;, Pct_Ballots_Counted != &quot;&quot;) %&gt;%
-               na.omit()
-
-merged_data$Pct_Ballots_Counted &lt;- as.numeric(strsplit(merged_data$Pct_Ballots_Counted, &quot;%&quot;))
 </code></pre>
 <h2>Methods</h2>
 First, I look to compare polling averages to turnout within each state (in cleaning my data, I removed national polls from the dataset). The plot below shows the relationship between a poll's margin between candidates (i.e. how close/far a candidate is from polling at exactly 50%) and the percentage of eligible individuals who turned out to vote. The points are colored by state in case we can observe a starker relationship in some states than others (e.g. we may expect the difference to be more pronounced in typical battleground states).
@@ -89,74 +76,6 @@ ggplot(data=yearly_polling_avgs, aes(x=abs(50 - polling_avg), y= turnout, color=
 </code></pre>
 <img src="/election-blog/post/2024/09/21/week-3-forecast/index_files/figure-html/unnamed-chunk-6-1.png" width="672" />
 <p>With 50 states represented, it is difficult to visually discern a relationship between how close a poll is and the turnout observed in its domain. I fit a multiple regression model below to determine if the effects of polling averages are more pronounced in some states than others. For each state, I obtain a coefficient for the extent to which polling averages explain variance in turnout in the elections between 1980 and 2012, and I order them from having the least effect to the most.</p>
-<pre><code class="language-r">library(nlme)
-</code></pre>
-<pre><code>## 
-## Attaching package: 'nlme'
-</code></pre>
-<pre><code>## The following object is masked from 'package:dplyr':
-## 
-##     collapse
-</code></pre>
-<pre><code class="language-r">longitudinal_model &lt;- lmList(turnout ~ abs(50 - polling_avg) | state, data=yearly_polling_avgs)
-
-coefficients &lt;- summary(longitudinal_model)$coefficients[, , 2][,1]
-
-data.frame(coefficient=sort(abs(coefficients), decreasing=T))
-</code></pre>
-<pre><code>##                       coefficient
-## North Carolina       2.138504e-01
-## Georgia              2.124286e-01
-## Colorado             2.008285e-01
-## Iowa                 1.957581e-01
-## Virginia             1.893230e-01
-## Delaware             1.606083e-01
-## Florida              1.565245e-01
-## Ohio                 1.333449e-01
-## Arkansas             1.295336e-01
-## Maryland             1.226265e-01
-## Minnesota            1.224102e-01
-## Nevada               1.175494e-01
-## New Mexico           1.167269e-01
-## Maine                1.053145e-01
-## Washington           1.030583e-01
-## Kentucky             1.027020e-01
-## South Carolina       1.012450e-01
-## Michigan             9.753316e-02
-## District of Columbia 9.627183e-02
-## New Jersey           9.370570e-02
-## Indiana              8.767767e-02
-## Arizona              8.135182e-02
-## Tennessee            7.788782e-02
-## New Hampshire        7.014599e-02
-## South Dakota         6.403875e-02
-## Louisiana            6.151298e-02
-## Massachusetts        5.895584e-02
-## West Virginia        5.593102e-02
-## Illinois             4.939704e-02
-## California           4.834636e-02
-## New York             4.818020e-02
-## Rhode Island         4.769034e-02
-## Nebraska             4.659975e-02
-## Utah                 4.372206e-02
-## Alabama              4.352011e-02
-## Kansas               3.968522e-02
-## Oregon               3.515755e-02
-## Connecticut          3.271554e-02
-## Alaska               3.044356e-02
-## Wyoming              2.873629e-02
-## Wisconsin            2.809571e-02
-## Vermont              2.352613e-02
-## Hawaii               1.620779e-02
-## Missouri             1.236463e-02
-## Oklahoma             8.932723e-03
-## Montana              7.643676e-03
-## Idaho                2.010398e-03
-## North Dakota         1.409148e-03
-## Pennsylvania         1.522823e-15
-## Texas                2.719539e-16
-## Mississippi          2.439426e-17
-</code></pre>
 <p>From the multiple regression model above, we can observe that North Carolina, Georgia, and Colorado show the strongest relationships between polling margins and voter turnout. These relationships are slight but positive, meaning that the further away from 50% a candidate is polling, the (i.e. the less-close an election), the <em>more</em> people turn out to vote, which is somewhat counter-intuitive. Again, the relationship is subtle with a correlation coefficient well below 1. Below, I graph the polling margins versus turnout rates for these three states only, to see this relationship.</p>
 <pre><code class="language-r">ggplot(data=subset(yearly_polling_avgs, state %in% c(&quot;Georgia&quot;, &quot;North Carolina&quot;, &quot;Colorado&quot;)), aes(x=abs(50 - polling_avg), y=turnout, color=state, label=year))+ 
   geom_point() + 
@@ -196,61 +115,6 @@ summary(simple_model)
 ## F-statistic:  4916 on 1 and 138959 DF,  p-value: &lt; 2.2e-16
 </code></pre>
 <p>This analysis shows that, at the national level, polling margin has a very slight impact on voter turnout. It is statistically significant, but the coefficient value of -0.111 conveys a very modest effect. I turn to investigating the state-by-state impacts of polling margin on turnout and print the coefficients and their p-values below:</p>
-<pre><code class="language-r">data.frame(coefficient=summary(longitudinal_model)$coefficients[, , 2][,1], pvalue=summary(longitudinal_model)$coefficients[, , 2][,4]) %&gt;% arrange(pvalue, asc=T)
-</code></pre>
-<pre><code>##                        coefficient      pvalue
-## Georgia              -2.124286e-01 0.009383362
-## Virginia             -1.893230e-01 0.010898729
-## Iowa                 -1.957581e-01 0.031235533
-## Colorado             -2.008285e-01 0.031927165
-## North Carolina       -2.138504e-01 0.032975773
-## Florida              -1.565245e-01 0.034953566
-## Ohio                 -1.333449e-01 0.054746937
-## Maryland             -1.226265e-01 0.055433964
-## Delaware             -1.606083e-01 0.064309292
-## South Carolina       -1.012450e-01 0.070105114
-## Nevada               -1.175494e-01 0.078515097
-## New Mexico           -1.167269e-01 0.083684411
-## Minnesota            -1.224102e-01 0.085613644
-## Washington           -1.030583e-01 0.150206151
-## Michigan             -9.753316e-02 0.177662121
-## Indiana              -8.767767e-02 0.189494620
-## New Jersey           -9.370570e-02 0.201028724
-## Kentucky             -1.027020e-01 0.213906554
-## Arizona              -8.135182e-02 0.255484892
-## New Hampshire        -7.014599e-02 0.284073679
-## Massachusetts        -5.895584e-02 0.394486904
-## Tennessee            -7.788782e-02 0.425395586
-## Louisiana            -6.151298e-02 0.431068749
-## Illinois             -4.939704e-02 0.466699553
-## New York             -4.818020e-02 0.496687320
-## Nebraska             -4.659975e-02 0.515096265
-## California           -4.834636e-02 0.521576338
-## West Virginia        -5.593102e-02 0.546191091
-## South Dakota         -6.403875e-02 0.549593170
-## District of Columbia -9.627183e-02 0.583168392
-## Kansas               -3.968522e-02 0.589350724
-## Rhode Island         -4.769034e-02 0.599877038
-## Oregon               -3.515755e-02 0.600506602
-## Utah                 -4.372206e-02 0.607752824
-## Arkansas             -1.295336e-01 0.634330800
-## Connecticut           3.271554e-02 0.691191431
-## Alaska                3.044356e-02 0.740506324
-## Vermont              -2.352613e-02 0.759900542
-## Maine                -1.053145e-01 0.762982759
-## Wyoming               2.873629e-02 0.786265161
-## Hawaii               -1.620779e-02 0.825458780
-## Oklahoma              8.932723e-03 0.908215155
-## Alabama               4.352011e-02 0.920849594
-## Montana              -7.643676e-03 0.926773792
-## Wisconsin             2.809571e-02 0.976029643
-## Idaho                -2.010398e-03 0.976148673
-## North Dakota         -1.409148e-03 0.983269539
-## Missouri              1.236463e-02 0.987114326
-## Texas                -2.719539e-16 1.000000000
-## Mississippi          -2.439426e-17 1.000000000
-## Pennsylvania         -1.522823e-15         NaN
-</code></pre>
 <p>The impacts of polling margin on turnout are significant in the following states:</p>
 <ul>
 <li>Colorado</li>
@@ -284,28 +148,6 @@ election_returns &lt;- election_returns %&gt;%
                     mutate(pct_received = candidatevotes/totalvotes)
 </code></pre>
 <p>Now, I would like to see how far off the polling averages were from the actual election returns for each of the 23 states that showed a significant relationship between polling margin and voter turnout, between 1980 and 2012.</p>
-<pre><code class="language-r">library(stringr)
-yearly_polling_avgs$state &lt;- toupper(yearly_polling_avgs$state)
-yearly_polling_avgs &lt;- yearly_polling_avgs %&gt;%
-                       mutate(candidate_name = case_when(candidate_name == &quot;Barack Obama&quot; ~ &quot;OBAMA, BARACK H.&quot;,
-                                                         candidate_name == &quot;Mitt Romney&quot; ~ &quot;ROMNEY, MITT&quot;,
-                                                         candidate_name == &quot;John McCain&quot; ~ &quot;MCCAIN, JOHN&quot;,
-                                                         candidate_name == &quot;George W. Bush&quot; ~ &quot;BUSH, GEORGE W.&quot;,
-                                                         candidate_name == &quot;John Kerry&quot; ~ &quot;KERRY, JOHN&quot;, 
-                                                         candidate_name == &quot;Al Gore&quot; ~ &quot;GORE, AL&quot;, 
-                                                         candidate_name == &quot;Bill Clinton&quot; ~ &quot;CLINTON, BILL&quot;, 
-                                                         candidate_name == &quot;Bob Dole&quot; ~ &quot;DOLE, ROBERT&quot;, 
-                                                         candidate_name == &quot;George Bush&quot; ~ &quot;BUSH, GEORGE H. W.&quot;,
-                                                         candidate_name == &quot;Michael S. Dukakis&quot; ~ &quot;DUKAKIS, MICHAEL&quot;, 
-                                                         candidate_name == &quot;Ronald Reagn&quot; ~ &quot;REAGAN, RONALD&quot;, 
-                                                         candidate_name == &quot;Walter F. Mondale&quot; ~ &quot;MONDALE, WALTER&quot;, 
-                                                         candidate_name == &quot;Jimmy Carter&quot; ~ &quot;CARTER, JIMMY&quot;))
-
-joint_data &lt;- yearly_polling_avgs %&gt;%
-              left_join(election_returns, by=join_by(year, state, candidate_name == candidate)) %&gt;%
-              select(!c(&quot;state_fips&quot;, &quot;state_cen&quot;, &quot;state_ic&quot;, &quot;office&quot;, &quot;writein&quot;, &quot;version&quot;, &quot;notes&quot;, &quot;party_detailed&quot;)) %&gt;%
-              na.exclude()
-</code></pre>
 <pre><code class="language-r"># plot the amount by which polls were off from reality in the 23 states
 filter_data &lt;- joint_data %&gt;%
                filter(state %in% c(&quot;COLORADO&quot;, &quot;DELAWARE&quot;, &quot;DISTRICT OF COLUMBIA&quot;, &quot;FLORIDA&quot;, &quot;GEORGIA&quot;, &quot;IDAHO&quot;, &quot;ILLINOIS&quot;, &quot;INDIANA&quot;, &quot;IOWA&quot;, &quot;KENTUCKY&quot;, &quot;MARYLAND&quot;, &quot;MICHIGAN&quot;, &quot;MINNESOTA&quot;, &quot;NEVADA&quot;, &quot;NEW JERSEY&quot;, &quot;NEW MEXICO&quot;, &quot;NORTH CAROLINA&quot;, &quot;OHIO&quot;, &quot;OKLAHOMA&quot;, &quot;SOUTH CAROLINA&quot;, &quot;TENNESSEE&quot;, &quot;VIRGINIA&quot;, &quot;WASHINGTON&quot;))
@@ -321,12 +163,6 @@ ggplot(data=filter_data, aes(x=index, y=(pct_received-(polling_avg/100)), label=
 </code></pre>
 <img src="/election-blog/post/2024/09/21/week-3-forecast/index_files/figure-html/unnamed-chunk-14-1.png" width="672" />
 <p>The outliers on the plot above represent elections in which the polling estimates were significantly different than the real outcomes. Elections were numbered with an index in the dataset, which is where the numbers on the plot come from. Since the dataset has data about how both candidates in each election performed in the polls, we notice that there are multiple points for the same election here, and it makes sense that their errors would be plotted on opposite sides of &lsquo;0&rsquo; because an over-estimate for one candidate guarantees an under-estimate for another. The races with the biggest discrepancies were:</p>
-<pre><code class="language-r">widest_differences &lt;- filter_data %&gt;%
-                        mutate(diff = abs(pct_received-(polling_avg/100))) %&gt;%
-                        arrange(desc(diff)) %&gt;%
-                        select(state, year, candidate_name, turnout, diff, polling_avg, pct_received) %&gt;%
-                        filter(diff &gt;= 0.05)
-</code></pre>
 <p>Each of the races in the dataframe above showed a 5-point or more difference between the candidate&rsquo;s polling average and their actual vote share in the specified state.</p>
 <p>Based on these outcomes, I create a set of weights by which to multiply the polling averages, to minimize the differences between their predictions and the true outcomes. Then I test whether the weights can be applied to improve predictions for the elections in these states in 2016 and 2020. If they do improve predictions, I will incorporate them into a prediction of the 2024 election based on polling, and if not I will exclude them.</p>
 <pre><code class="language-r"># creating the weights -- minimize `diff` in a given state
@@ -340,32 +176,6 @@ for (i in seq(1, states)) {
 }
 
 weights_df &lt;- data.frame(state = unique(widest_differences$state), weight = weights)
-</code></pre>
-<pre><code class="language-r"># for 2016 data, check to see if multiplication by the weights brings the estimates closer to reality
-# data cleaning
-data_2016 &lt;- avg_68_16 %&gt;% 
-              filter(cycle == 2016, candidate_name %in% c(&quot;Donald Trump&quot;, &quot;Hillary Rodham Clinton&quot;)) %&gt;%
-              group_by(state, cycle, candidate_name) %&gt;%
-              mutate(polling_avg = mean(pct_estimate) / 100, candidate_name = case_when(candidate_name == &quot;Donald Trump&quot; ~ &quot;TRUMP, DONALD J.&quot;, candidate_name == &quot;Hillary Rodham Clinton&quot; ~ &quot;CLINTON, HILLARY&quot;), state = toupper(state)) %&gt;%
-              select(state, cycle, candidate_name, polling_avg) %&gt;%
-              distinct()
-colnames(data_2016) &lt;- c(&quot;state&quot;, &quot;year&quot;, &quot;candidate_name&quot;, &quot;polling_avg&quot;)
-                  
-election_returns_clean &lt;- read.csv(&quot;1976-2020-president.csv&quot;)
-merge_2016 &lt;- data_2016 %&gt;%
-                left_join(election_returns_clean, by=join_by(year, state, candidate_name == candidate)) %&gt;%
-                select(!c(&quot;state_fips&quot;, &quot;state_cen&quot;, &quot;state_ic&quot;, &quot;office&quot;, &quot;writein&quot;, &quot;version&quot;, &quot;notes&quot;, &quot;party_detailed&quot;)) %&gt;%
-                na.exclude() %&gt;%
-                filter(state != &quot;National&quot;, !(candidatevotes %in% c(259, 78)))
-merge_2016$pct_received = round(merge_2016$candidatevotes/merge_2016$totalvotes, 7)
-
-# filter to 23 elections from above
-filter_2016 &lt;- merge_2016 %&gt;%
-                filter(state %in% c(&quot;COLORADO&quot;, &quot;DELAWARE&quot;, &quot;DISTRICT OF COLUMBIA&quot;, &quot;FLORIDA&quot;, &quot;GEORGIA&quot;, &quot;IDAHO&quot;, &quot;ILLINOIS&quot;, &quot;INDIANA&quot;, &quot;IOWA&quot;, &quot;KENTUCKY&quot;, &quot;MARYLAND&quot;, &quot;MICHIGAN&quot;, &quot;MINNESOTA&quot;, &quot;NEVADA&quot;, &quot;NEW JERSEY&quot;, &quot;NEW MEXICO&quot;, &quot;NORTH CAROLINA&quot;, &quot;OHIO&quot;, &quot;OKLAHOMA&quot;, &quot;SOUTH CAROLINA&quot;, &quot;TENNESSEE&quot;, &quot;VIRGINIA&quot;, &quot;WASHINGTON&quot;))
-
-effect_of_weights_2016 &lt;- data.frame(state = filter_2016$state, differences = filter_2016$pct_received - filter_2016$polling_avg) %&gt;%
-                            left_join(weights_df, by=join_by(state)) %&gt;%
-                            mutate(differences_with_weights = filter_2016$pct_received - weight*filter_2016$polling_avg)
 </code></pre>
 <p>Below are the races for which weighting <em>improved</em> the predictions of polling (i.e. made them closer to the actual outcome):</p>
 <pre><code class="language-r">subset(effect_of_weights_2016, abs(differences_with_weights) &lt; abs(differences)) %&gt;% arrange(state)
