@@ -1,6 +1,6 @@
 ---
 title: Forecast 09/21/2024
-author: Package Build
+author: Catherine Stanton
 date: '2024-09-21'
 slug: week-3-forecast
 categories: []
