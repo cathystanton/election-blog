@@ -144,28 +144,11 @@ data.frame(coefficient=summary(longitudinal_model)$coefficients[, , 2][,1], pval
 
 The impacts of polling margin on turnout are significant in the following states:  
 * Colorado
-* Delaware
-* D.C.
 * Florida
 * Georgia
-* Idaho
-* Illinois
-* Indiana
 * Iowa
-* Kentucky
-* Maryland
-* Michigan
-* Minnesota
-* Nevada
-* New Jersey
-* New Mexico
 * North Carolina
-* Ohio
-* Oklahoma
-* South Carolina
-* Tennessee
 * Virginia
-* Washington
 
 To investigate whether polling margins should be adjusted to account for the effect of polls on turnout in these states in order to achieve more accurate election predictions, I will load and clean a dataset of state-level presidential returns from 1976 through 2020 from the MIT Election Data Lab. In this dataset, I removed rows about third-party candidates or write-in candidates to be more consistent with the polling averages datasets.
 
@@ -176,7 +159,7 @@ election_returns <- election_returns %>%
                     mutate(pct_received = candidatevotes/totalvotes)
 ```
 
-Now, I would like to see how far off the polling averages were from the actual election returns for each of the 23 states that showed a significant relationship between polling margin and voter turnout, between 1980 and 2012.
+Now, I would like to see how far off the polling averages were from the actual election returns for each of the 6 states that showed a significant relationship between polling margin and voter turnout, between 1980 and 2012.
 
 ```{r, include=F}
 library(stringr)
@@ -203,9 +186,9 @@ joint_data <- yearly_polling_avgs %>%
 ```
 
 ```{r, warning = F}
-# plot the amount by which polls were off from reality in the 23 states
+# plot the amount by which polls were off from reality in the 6 states
 filter_data <- joint_data %>%
-               filter(state %in% c("COLORADO", "DELAWARE", "DISTRICT OF COLUMBIA", "FLORIDA", "GEORGIA", "IDAHO", "ILLINOIS", "INDIANA", "IOWA", "KENTUCKY", "MARYLAND", "MICHIGAN", "MINNESOTA", "NEVADA", "NEW JERSEY", "NEW MEXICO", "NORTH CAROLINA", "OHIO", "OKLAHOMA", "SOUTH CAROLINA", "TENNESSEE", "VIRGINIA", "WASHINGTON"))
+               filter(state %in% c("COLORADO", "FLORIDA", "GEORGIA", "IOWA", "NORTH CAROLINA", "VIRGINIA"))
 
 filter_data$index <- seq(1, nrow(filter_data))
 
@@ -236,8 +219,8 @@ Based on these outcomes, I create a set of weights by which to multiply the poll
 # creating the weights -- minimize `diff` in a given state
 widest_differences <- widest_differences %>% arrange(state, year) %>% mutate(polling_pct = polling_avg / 100)
 
-states <- 23
-weights <- rep(NA, 23)
+states <- 6
+weights <- rep(NA, 6)
 for (i in seq(1, states)) {
   races <- subset(widest_differences, state == unique(widest_differences$state)[i])
   weights[i] <- sum(races$pct_received) / sum(races$polling_pct)
@@ -266,9 +249,9 @@ merge_2016 <- data_2016 %>%
                 filter(state != "National", !(candidatevotes %in% c(259, 78)))
 merge_2016$pct_received = round(merge_2016$candidatevotes/merge_2016$totalvotes, 7)
 
-# filter to 23 elections from above
+# filter to 6 elections from above
 filter_2016 <- merge_2016 %>%
-                filter(state %in% c("COLORADO", "DELAWARE", "DISTRICT OF COLUMBIA", "FLORIDA", "GEORGIA", "IDAHO", "ILLINOIS", "INDIANA", "IOWA", "KENTUCKY", "MARYLAND", "MICHIGAN", "MINNESOTA", "NEVADA", "NEW JERSEY", "NEW MEXICO", "NORTH CAROLINA", "OHIO", "OKLAHOMA", "SOUTH CAROLINA", "TENNESSEE", "VIRGINIA", "WASHINGTON"))
+                filter(state %in% c("COLORADO", "FLORIDA", "GEORGIA", "IOWA", "NORTH CAROLINA", "VIRGINIA"))
 
 effect_of_weights_2016 <- data.frame(state = filter_2016$state, differences = filter_2016$pct_received - filter_2016$polling_avg) %>%
                             left_join(weights_df, by=join_by(state)) %>%
@@ -282,7 +265,7 @@ Below are the races for which weighting *improved* the predictions of polling (i
 subset(effect_of_weights_2016, abs(differences_with_weights) < abs(differences)) %>% arrange(state)
 ```
 
-In 2016, 22 states' predictions were improved with the weighting scheme applied. I repeated the same process and then found the races for which the same weighting scheme *improved* the predictions for 2020:
+In 2016, all 6 states' predictions were improved with the weighting scheme applied. I repeated the same process and then found the races for which the same weighting scheme *improved* the predictions for 2020:
 
 ```{r, echo = F, include=F}
 # repeat for 2020
@@ -300,9 +283,9 @@ merge_2020 <- data_2020 %>%
                 filter(state != "National")
 merge_2020$pct_received = round(merge_2020$candidatevotes/merge_2020$totalvotes, 7)
 
-# filter to 23 elections from above
+# filter to 6 elections from above
 filter_2020 <- merge_2020 %>%
-                filter(state %in% c("COLORADO", "DELAWARE", "DISTRICT OF COLUMBIA", "FLORIDA", "GEORGIA", "IDAHO", "ILLINOIS", "INDIANA", "IOWA", "KENTUCKY", "MARYLAND", "MICHIGAN", "MINNESOTA", "NEVADA", "NEW JERSEY", "NEW MEXICO", "NORTH CAROLINA", "OHIO", "OKLAHOMA", "SOUTH CAROLINA", "TENNESSEE", "VIRGINIA", "WASHINGTON"))
+                filter(state %in% c("COLORADO", "FLORIDA", "GEORGIA", "IOWA", "NORTH CAROLINA", "VIRGINIA"))
 
 effect_of_weights_2020 <- data.frame(state = filter_2020$state, differences = filter_2020$pct_received - filter_2020$polling_avg) %>%
                             left_join(weights_df, by=join_by(state)) %>%
@@ -316,7 +299,7 @@ effect_of_weights_2020 <- data.frame(state = filter_2020$state, differences = fi
 subset(effect_of_weights_2020, abs(differences_with_weights) < abs(differences)) %>% arrange(state)
 ```
 
-In 2020, 14 states' predictions were improved by applying this weighting scheme. Given the positive effects of the weighting scheme on the polls' predictions in 2016 and 2020, I will apply it to data from 2024 to make a forecast. I still want to include polling averages from the other states, but I will not weight them in this prediction. I will only weight the 23 from above.
+In 2020, 3 states' predictions were improved by applying this weighting scheme. Given the positive effects of the weighting scheme on the polls' predictions in 2016 and 2020, I will apply it to data from 2024 to make a forecast. I still want to include polling averages from the other states, but I will not weight them in this prediction. I will only weight the 6 from above.
 
 ```{r}
 avg_24 <- subset(avg_24, !is.na(pct_estimate)) %>%
@@ -334,7 +317,7 @@ Trump_pct <- mean(subset(avg_24, candidate == "Trump")$polling_avg)
 
 ```
 
-Based on the model built in this blog post, which involved computing a set of weights to adjust polling predictions in certain states, based on historical discrepancies between polls and real election outcomes, we found the share of the popular vote that Kamala Harris and Donald Trump will win in each state. It is worth noting that Robert F. Kennedy (RFK) was excluded from the analysis but included in the dat that pre-date his campaign suspension, so the percentage of the popular vote for Donald Trump may be a few points higher, under the assumption that votes previously intended for RFK will be re-allocated towards Trump. On average, across states, we found that Kamala Harris will receive 51.42% of the popular vote and Donald Trump will receive 47.63%, which is reasonable given how close of an election this is.
+Based on the model built in this blog post, which involved computing a set of weights to adjust polling predictions in certain states, based on historical discrepancies between polls and real election outcomes, we found the share of the popular vote that Kamala Harris and Donald Trump will win in each state. It is worth noting that Robert F. Kennedy (RFK) was excluded from the analysis but included in the dat that pre-date his campaign suspension, so the percentage of the popular vote for Donald Trump may be a few points higher, under the assumption that votes previously intended for RFK will be re-allocated towards Trump. On average, across states, we found that Kamala Harris will receive 58.69% of the popular vote and Donald Trump will receive 45.19%, which is reasonable given how close of an election this is.
 
 <h2>Takeaways and Follow-Up Questions</h2>
 Today, I investigated whether polls subvert themselves, or cause results that are different from the ones they predict: I asked the margin by which a poll estimates a candidate's lead impacts voter turnout and preference. While I did not find strong evidence that poll margins impact voter turnout by very much (in most states), I did find that using historical data about the difference between poll predictions and actuality to create weights for polls from different states led to more accurate estimates for the percentage of the popular vote that a candidate would receive. This technique can be applied to future datasets; analysts may choose to measure the impact of a variable on particular states, over time, and decide to weight the results of current polls on that feature, from those states, differently to achieve better aggregate predictions.  

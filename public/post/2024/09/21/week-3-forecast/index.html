@@ -118,28 +118,11 @@ summary(simple_model)
 <p>The impacts of polling margin on turnout are significant in the following states:</p>
 <ul>
 <li>Colorado</li>
-<li>Delaware</li>
-<li>D.C.</li>
 <li>Florida</li>
 <li>Georgia</li>
-<li>Idaho</li>
-<li>Illinois</li>
-<li>Indiana</li>
 <li>Iowa</li>
-<li>Kentucky</li>
-<li>Maryland</li>
-<li>Michigan</li>
-<li>Minnesota</li>
-<li>Nevada</li>
-<li>New Jersey</li>
-<li>New Mexico</li>
 <li>North Carolina</li>
-<li>Ohio</li>
-<li>Oklahoma</li>
-<li>South Carolina</li>
-<li>Tennessee</li>
 <li>Virginia</li>
-<li>Washington</li>
 </ul>
 <p>To investigate whether polling margins should be adjusted to account for the effect of polls on turnout in these states in order to achieve more accurate election predictions, I will load and clean a dataset of state-level presidential returns from 1976 through 2020 from the MIT Election Data Lab. In this dataset, I removed rows about third-party candidates or write-in candidates to be more consistent with the polling averages datasets.</p>
 <pre><code class="language-r">election_returns &lt;- read.csv(&quot;1976-2020-president.csv&quot;)
@@ -147,10 +130,10 @@ election_returns &lt;- election_returns %&gt;%
                     filter(party_simplified %in% c(&quot;DEMOCRAT&quot;, &quot;REPUBLICAN&quot;), year &gt;= 1980, year &lt;= 2012) %&gt;%
                     mutate(pct_received = candidatevotes/totalvotes)
 </code></pre>
-<p>Now, I would like to see how far off the polling averages were from the actual election returns for each of the 23 states that showed a significant relationship between polling margin and voter turnout, between 1980 and 2012.</p>
-<pre><code class="language-r"># plot the amount by which polls were off from reality in the 23 states
+<p>Now, I would like to see how far off the polling averages were from the actual election returns for each of the 6 states that showed a significant relationship between polling margin and voter turnout, between 1980 and 2012.</p>
+<pre><code class="language-r"># plot the amount by which polls were off from reality in the 6 states
 filter_data &lt;- joint_data %&gt;%
-               filter(state %in% c(&quot;COLORADO&quot;, &quot;DELAWARE&quot;, &quot;DISTRICT OF COLUMBIA&quot;, &quot;FLORIDA&quot;, &quot;GEORGIA&quot;, &quot;IDAHO&quot;, &quot;ILLINOIS&quot;, &quot;INDIANA&quot;, &quot;IOWA&quot;, &quot;KENTUCKY&quot;, &quot;MARYLAND&quot;, &quot;MICHIGAN&quot;, &quot;MINNESOTA&quot;, &quot;NEVADA&quot;, &quot;NEW JERSEY&quot;, &quot;NEW MEXICO&quot;, &quot;NORTH CAROLINA&quot;, &quot;OHIO&quot;, &quot;OKLAHOMA&quot;, &quot;SOUTH CAROLINA&quot;, &quot;TENNESSEE&quot;, &quot;VIRGINIA&quot;, &quot;WASHINGTON&quot;))
+               filter(state %in% c(&quot;COLORADO&quot;, &quot;FLORIDA&quot;, &quot;GEORGIA&quot;, &quot;IOWA&quot;, &quot;NORTH CAROLINA&quot;, &quot;VIRGINIA&quot;))
 
 filter_data$index &lt;- seq(1, nrow(filter_data))
 
@@ -168,8 +151,8 @@ ggplot(data=filter_data, aes(x=index, y=(pct_received-(polling_avg/100)), label=
 <pre><code class="language-r"># creating the weights -- minimize `diff` in a given state
 widest_differences &lt;- widest_differences %&gt;% arrange(state, year) %&gt;% mutate(polling_pct = polling_avg / 100)
 
-states &lt;- 23
-weights &lt;- rep(NA, 23)
+states &lt;- 6
+weights &lt;- rep(NA, 6)
 for (i in seq(1, states)) {
   races &lt;- subset(widest_differences, state == unique(widest_differences$state)[i])
   weights[i] &lt;- sum(races$pct_received) / sum(races$polling_pct)
@@ -180,58 +163,26 @@ weights_df &lt;- data.frame(state = unique(widest_differences$state), weight = w
 <p>Below are the races for which weighting <em>improved</em> the predictions of polling (i.e. made them closer to the actual outcome):</p>
 <pre><code class="language-r">subset(effect_of_weights_2016, abs(differences_with_weights) &lt; abs(differences)) %&gt;% arrange(state)
 </code></pre>
-<pre><code>##             state differences   weight differences_with_weights
-## 1        COLORADO  0.06190332 1.148897            -0.0005839391
-## 2        DELAWARE  0.07975927 1.169038             0.0223761049
-## 3        DELAWARE  0.08251629 1.169038             0.0062772350
-## 4         FLORIDA  0.06424174 1.163012            -0.0051976346
-## 5         GEORGIA  0.05306180 1.152272            -0.0161687381
-## 6         GEORGIA  0.03624860 1.152272            -0.0277285215
-## 7           IDAHO  0.08598601 1.138980             0.0155746339
-## 8        ILLINOIS  0.05805239 1.061580             0.0377577856
-## 9        ILLINOIS  0.05574380 1.061580             0.0247992628
-## 10        INDIANA  0.09495006 1.129553             0.0334836144
-## 11           IOWA  0.09517054 1.166919             0.0256571968
-## 12       KENTUCKY  0.16727110 1.175146             0.0870674568
-## 13       MARYLAND  0.04953928 1.222189            -0.0147964348
-## 14       MICHIGAN  0.10579749 1.238855             0.0176172693
-## 15      MINNESOTA  0.05914202 1.231704            -0.0312480508
-## 16         NEVADA  0.05336204 1.235369            -0.0468620893
-## 17     NEW JERSEY  0.04089989 1.209457            -0.0371445407
-## 18     NEW JERSEY  0.06852149 1.209457            -0.0332764439
-## 19     NEW MEXICO  0.07119567 1.218737            -0.0008189094
-## 20     NEW MEXICO  0.07179683 1.218737            -0.0180514032
-## 21 NORTH CAROLINA  0.06963555 1.164060            -0.0006880618
-## 22           OHIO  0.09687251 1.193020             0.0158034558
-## 23       OKLAHOMA  0.13982824 1.088352             0.0944682697
-## 24 SOUTH CAROLINA  0.09045357 1.220664            -0.0108177326
-## 25      TENNESSEE  0.13093138 1.193834             0.0386104671
-## 26       VIRGINIA  0.06849504 1.172130             0.0038116035
-## 27       VIRGINIA  0.04336288 1.172130            -0.0348102710
-## 28     WASHINGTON  0.05500057 1.180798            -0.0300444493
+<pre><code>##            state differences   weight differences_with_weights
+## 1       COLORADO  0.06190332 1.148897            -0.0005839391
+## 2        FLORIDA  0.06424174 1.163012            -0.0051976346
+## 3        GEORGIA  0.05306180 1.152272            -0.0161687381
+## 4        GEORGIA  0.03624860 1.152272            -0.0277285215
+## 5           IOWA  0.09517054 1.166919             0.0256571968
+## 6 NORTH CAROLINA  0.06963555 1.164060            -0.0006880618
+## 7       VIRGINIA  0.06849504 1.172130             0.0038116035
+## 8       VIRGINIA  0.04336288 1.172130            -0.0348102710
 </code></pre>
-<p>In 2016, 22 states&rsquo; predictions were improved with the weighting scheme applied. I repeated the same process and then found the races for which the same weighting scheme <em>improved</em> the predictions for 2020:</p>
+<p>In 2016, all 6 states&rsquo; predictions were improved with the weighting scheme applied. I repeated the same process and then found the races for which the same weighting scheme <em>improved</em> the predictions for 2020:</p>
 <pre><code class="language-r"># improved for 2020
 subset(effect_of_weights_2020, abs(differences_with_weights) &lt; abs(differences)) %&gt;% arrange(state)
 </code></pre>
-<pre><code>##             state differences   weight differences_with_weights
-## 1         FLORIDA  0.06042327 1.163012             -0.013221368
-## 2           IDAHO  0.05131453 1.138980             -0.030275428
-## 3        ILLINOIS  0.02660274 1.061580             -0.007193194
-## 4        ILLINOIS  0.01623568 1.061580             -0.007737332
-## 5         INDIANA  0.05249199 1.129553             -0.014580137
-## 6            IOWA  0.04965512 1.166919             -0.030189959
-## 7        KENTUCKY  0.06234451 1.175146             -0.035478063
-## 8        MICHIGAN  0.05273476 1.238855             -0.048931239
-## 9          NEVADA  0.05483533 1.235369             -0.044449913
-## 10     NEW JERSEY  0.05060841 1.209457             -0.025499123
-## 11 NORTH CAROLINA  0.03985458 1.164060             -0.035529197
-## 12           OHIO  0.06317363 1.193020             -0.027456732
-## 13       OKLAHOMA  0.06241367 1.088352              0.010169420
-## 14      TENNESSEE  0.06199887 1.193834             -0.043563829
-## 15     WASHINGTON  0.03784322 1.180798             -0.025404821
+<pre><code>##            state differences   weight differences_with_weights
+## 1        FLORIDA  0.06042327 1.163012              -0.01322137
+## 2           IOWA  0.04965512 1.166919              -0.03018996
+## 3 NORTH CAROLINA  0.03985458 1.164060              -0.03552920
 </code></pre>
-<p>In 2020, 14 states&rsquo; predictions were improved by applying this weighting scheme. Given the positive effects of the weighting scheme on the polls&rsquo; predictions in 2016 and 2020, I will apply it to data from 2024 to make a forecast. I still want to include polling averages from the other states, but I will not weight them in this prediction. I will only weight the 23 from above.</p>
+<p>In 2020, 3 states&rsquo; predictions were improved by applying this weighting scheme. Given the positive effects of the weighting scheme on the polls&rsquo; predictions in 2016 and 2020, I will apply it to data from 2024 to make a forecast. I still want to include polling averages from the other states, but I will not weight them in this prediction. I will only weight the 6 from above.</p>
 <pre><code class="language-r">avg_24 &lt;- subset(avg_24, !is.na(pct_estimate)) %&gt;%
           mutate(state = toupper(state)) %&gt;%
           left_join(weights_df, by=join_by(state))
@@ -245,7 +196,7 @@ avg_24 &lt;- avg_24 %&gt;% group_by(state, candidate) %&gt;% mutate(polling_avg 
 Harris_pct &lt;- mean(subset(avg_24, candidate == &quot;Harris&quot;)$polling_avg)
 Trump_pct &lt;- mean(subset(avg_24, candidate == &quot;Trump&quot;)$polling_avg)
 </code></pre>
-<p>Based on the model built in this blog post, which involved computing a set of weights to adjust polling predictions in certain states, based on historical discrepancies between polls and real election outcomes, we found the share of the popular vote that Kamala Harris and Donald Trump will win in each state. It is worth noting that Robert F. Kennedy (RFK) was excluded from the analysis but included in the dat that pre-date his campaign suspension, so the percentage of the popular vote for Donald Trump may be a few points higher, under the assumption that votes previously intended for RFK will be re-allocated towards Trump. On average, across states, we found that Kamala Harris will receive 51.42% of the popular vote and Donald Trump will receive 47.63%, which is reasonable given how close of an election this is.</p>
+<p>Based on the model built in this blog post, which involved computing a set of weights to adjust polling predictions in certain states, based on historical discrepancies between polls and real election outcomes, we found the share of the popular vote that Kamala Harris and Donald Trump will win in each state. It is worth noting that Robert F. Kennedy (RFK) was excluded from the analysis but included in the dat that pre-date his campaign suspension, so the percentage of the popular vote for Donald Trump may be a few points higher, under the assumption that votes previously intended for RFK will be re-allocated towards Trump. On average, across states, we found that Kamala Harris will receive 58.69% of the popular vote and Donald Trump will receive 45.19%, which is reasonable given how close of an election this is.</p>
 <h2>Takeaways and Follow-Up Questions</h2>
 Today, I investigated whether polls subvert themselves, or cause results that are different from the ones they predict: I asked the margin by which a poll estimates a candidate's lead impacts voter turnout and preference. While I did not find strong evidence that poll margins impact voter turnout by very much (in most states), I did find that using historical data about the difference between poll predictions and actuality to create weights for polls from different states led to more accurate estimates for the percentage of the popular vote that a candidate would receive. This technique can be applied to future datasets; analysts may choose to measure the impact of a variable on particular states, over time, and decide to weight the results of current polls on that feature, from those states, differently to achieve better aggregate predictions.  
 It should be noted that the ability to ask these questions--whether polls influence voter turnout--is relatively new. Before the age of the internet, when the electorate didn't have access to thousands of ever-updating polls at their fingertips, the influence of poll margins on voter turnout would have been more difficult to measure because there would have been fewer data points from which to measure a candidate's polling performance. It should also be noted that the method of finding and selecting weights can be done with more complex optimization functions, that account for other features of the data, and that it is better done with big data (bigger than the number of U.S. presidential elections in any dataset). 
