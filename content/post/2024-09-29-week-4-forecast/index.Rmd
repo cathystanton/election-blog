@@ -1,6 +1,6 @@
 ---
-title: week-4-forecast
-author: Package Build
+title: Forecast 09/30/2024
+author: Catherine Stanton
 date: '2024-09-29'
 slug: week-4-forecast
 categories: []
@@ -49,7 +49,7 @@ state_votes <- state_votes %>%
 
 First, I decided to investigate whether particular states tend to vote for incumbent parties more often than others. The maps below show each state that voted for an incumbent party versus a challenger party's candidate in every election since 1948.
 
-```{r}
+```{r, include=F}
 # states where the incumbent won since 1948
 states_map <- map_data("state")
 
