@@ -23,7 +23,7 @@ library(tidyverse)
 ```
 
 ## set working directory here
-# setwd("~")
+setwd("~/election-blog/content/post/2024-09-04-week-1-09-09-2024")
 
 ####----------------------------------------------------------#
 #### Read and clean presidential popular vote.

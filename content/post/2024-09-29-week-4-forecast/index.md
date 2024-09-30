@@ -1,6 +1,6 @@
 ---
-title: week-4-forecast
-author: Package Build
+title: Forecast 09/30/2024
+author: Catherine Stanton
 date: '2024-09-29'
 slug: week-4-forecast
 categories: []
@@ -23,55 +23,64 @@ I'll use data about the popular vote in each state since 1948 to determine wheth
 
 First, I decided to investigate whether particular states tend to vote for incumbent parties more often than others. The maps below show each state that voted for an incumbent party versus a challenger party's candidate in every election since 1948.
 
-
-```r
-# states where the incumbent won since 1948
-states_map <- map_data("state")
-
-state_votes %>%
-  mutate(state = tolower(state)) %>%
-  full_join(states_map, by=join_by(state == region)) %>%
-  ggplot(aes(long, lat, group=group)) +
-    facet_wrap(facets = year ~.) + 
-    geom_polygon(aes(fill=state_voted_incumbent), color="white") +
-    theme_void()
-```
-
-```
-## Warning in full_join(., states_map, by = join_by(state == region)): Detected an unexpected many-to-many relationship between `x` and `y`.
-## ℹ Row 1 of `x` matches multiple rows in `y`.
-## ℹ Row 1 of `y` matches multiple rows in `x`.
-## ℹ If a many-to-many relationship is expected, set `relationship =
-##   "many-to-many"` to silence this warning.
-```
-
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-2-1.png" width="672" />
 
 There is no visible trend of states that *consistently* vote for incumbent parties or *consistently* vote for challenger party candidates. So I decided to calculate the percentages of times since 1948 that each state has voted for an incumbent party's candidate. The results are in the table below:
 
 
-```r
-state_votes2 <- state_votes %>% group_by(state) %>% count(state_voted_incumbent) %>% filter(state_voted_incumbent==T) %>% select(state, n) %>% mutate(pct_incumbent=n/18) %>% arrange(desc(pct_incumbent))
-
-state_votes2
 ```
-
-```
-## # A tibble: 51 × 3
-## # Groups:   state [51]
-##    state          n pct_incumbent
-##    <chr>      <int>         <dbl>
-##  1 California    12         0.667
-##  2 Florida       12         0.667
-##  3 Idaho         12         0.667
-##  4 Iowa          12         0.667
-##  5 Kentucky      12         0.667
-##  6 Maine         12         0.667
-##  7 New Mexico    12         0.667
-##  8 Oklahoma      12         0.667
-##  9 Utah          12         0.667
-## 10 Virginia      12         0.667
-## # ℹ 41 more rows
+##                   state  n pct_incumbent
+## 1            California 12     0.6666667
+## 2               Florida 12     0.6666667
+## 3                 Idaho 12     0.6666667
+## 4                  Iowa 12     0.6666667
+## 5              Kentucky 12     0.6666667
+## 6                 Maine 12     0.6666667
+## 7            New Mexico 12     0.6666667
+## 8              Oklahoma 12     0.6666667
+## 9                  Utah 12     0.6666667
+## 10             Virginia 12     0.6666667
+## 11           Washington 12     0.6666667
+## 12        West Virginia 12     0.6666667
+## 13              Wyoming 12     0.6666667
+## 14              Arizona 11     0.6111111
+## 15             Colorado 11     0.6111111
+## 16          Connecticut 11     0.6111111
+## 17             Illinois 11     0.6111111
+## 18               Kansas 11     0.6111111
+## 19            Louisiana 11     0.6111111
+## 20             Maryland 11     0.6111111
+## 21              Montana 11     0.6111111
+## 22             Nebraska 11     0.6111111
+## 23               Nevada 11     0.6111111
+## 24         North Dakota 11     0.6111111
+## 25                 Ohio 11     0.6111111
+## 26         Rhode Island 11     0.6111111
+## 27         South Dakota 11     0.6111111
+## 28            Tennessee 11     0.6111111
+## 29                Texas 11     0.6111111
+## 30              Vermont 11     0.6111111
+## 31               Alaska 10     0.5555556
+## 32             Arkansas 10     0.5555556
+## 33              Indiana 10     0.5555556
+## 34             Michigan 10     0.5555556
+## 35            Minnesota 10     0.5555556
+## 36          Mississippi 10     0.5555556
+## 37        New Hampshire 10     0.5555556
+## 38           New Jersey 10     0.5555556
+## 39             New York 10     0.5555556
+## 40               Oregon 10     0.5555556
+## 41              Alabama  9     0.5000000
+## 42             Delaware  9     0.5000000
+## 43               Hawaii  9     0.5000000
+## 44        Massachusetts  9     0.5000000
+## 45             Missouri  9     0.5000000
+## 46       North Carolina  9     0.5000000
+## 47         Pennsylvania  9     0.5000000
+## 48       South Carolina  9     0.5000000
+## 49            Wisconsin  9     0.5000000
+## 50              Georgia  8     0.4444444
+## 51 District Of Columbia  7     0.3888889
 ```
 
 Interestingly, the states that voted for an incumbent party *most* often candidate did so in two-thirds of the elections since 1948. Washington D.C. was *least* likely to pick an incumbent candidate, and it did so just over a third of the time since 1948. Overall, it makes sense that states do not *consistently* vote for an incumbent or a challenger over time because the incumbent's party tends to flip from Democrat to Republican, and vice versa, every few terms. Many states show consistency in the party they vote for, which means that they will necessarily swap from voting for to against an incumbent (or vice versa) every few elections. It would be most interesting to see if battleground states (states that notably *don't* show consistency in the party they vote for) tended to vote for incumbent parties more than challengers, but that is not evident from the analysis above.  

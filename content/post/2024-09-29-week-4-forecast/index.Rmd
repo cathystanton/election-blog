@@ -49,7 +49,7 @@ state_votes <- state_votes %>%
 
 First, I decided to investigate whether particular states tend to vote for incumbent parties more often than others. The maps below show each state that voted for an incumbent party versus a challenger party's candidate in every election since 1948.
 
-```{r, include=F}
+```{r, echo=F, warning = F}
 # states where the incumbent won since 1948
 states_map <- map_data("state")
 
@@ -64,10 +64,10 @@ state_votes %>%
 
 There is no visible trend of states that *consistently* vote for incumbent parties or *consistently* vote for challenger party candidates. So I decided to calculate the percentages of times since 1948 that each state has voted for an incumbent party's candidate. The results are in the table below:
 
-```{r}
+```{r, echo=F, warning = F}
 state_votes2 <- state_votes %>% group_by(state) %>% count(state_voted_incumbent) %>% filter(state_voted_incumbent==T) %>% select(state, n) %>% mutate(pct_incumbent=n/18) %>% arrange(desc(pct_incumbent))
 
-state_votes2
+data.frame(state_votes2)
 ```
 
 Interestingly, the states that voted for an incumbent party *most* often candidate did so in two-thirds of the elections since 1948. Washington D.C. was *least* likely to pick an incumbent candidate, and it did so just over a third of the time since 1948. Overall, it makes sense that states do not *consistently* vote for an incumbent or a challenger over time because the incumbent's party tends to flip from Democrat to Republican, and vice versa, every few terms. Many states show consistency in the party they vote for, which means that they will necessarily swap from voting for to against an incumbent (or vice versa) every few elections. It would be most interesting to see if battleground states (states that notably *don't* show consistency in the party they vote for) tended to vote for incumbent parties more than challengers, but that is not evident from the analysis above.  
