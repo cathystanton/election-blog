@@ -6,8 +6,15 @@
     <description>Recent content in Home on GOV 1347: Election Analytics Blog</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 21 Sep 2024 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 29 Sep 2024 00:00:00 +0000</lastBuildDate>
     <atom:link href="http://localhost:4321/election-blog/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>week-4-forecast</title>
+      <link>http://localhost:4321/election-blog/post/2024/09/29/week-4-forecast/</link>
+      <pubDate>Sun, 29 Sep 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:4321/election-blog/post/2024/09/29/week-4-forecast/</guid>
+      <description>&lt;h1&gt;Week 4: September 30, 2024&lt;/h1&gt;  &#xA;This blog is an ongoing project for Professor Ryan Enos&#39; Election Analytics Course at Harvard College (GOV 1347, Fall 2024). It will be updated weekly with posts analyzing how different features impact the likelihood of Kamala Harris (D) or Donald Trump (R) winning the 2024 U.S. Presidential Election or winning specific states in the election. The blog will culminate in a final predictive model for the outcome of the general election.&#xA;&lt;h2&gt;Context &amp; Question&lt;/h2&gt;&#xA;In the 18 elections since the end of World War II (1948), incumbent candidates have won a third of them. But considering that the incumbent president has only run in 11 of those elections, the statistic comes out to be that the incumbent won in about **two-thirds** of elections in which they were running. So this week&#39;s blog explores whether incumbency really matters in a presidential race, and whether it&#39;s a good prediction of an election outcome. We can measure &#34;incumbency&#34; both on the basis of the candidate and the party. This is especially interesting in the 2024 race because one candidate (Donald Trump) is not a *direct* incumbent, meaning he did not serve in the pevious term, but he has served before. And the other candidate (Kamala Harris) is a member of the incumbent party *and* incumbent administration, but is not a president seeking re-election.&#xA;&lt;h2&gt;The Data&lt;/h2&gt;&#xA;I&#39;ll use data about the popular vote in each state since 1948 to determine whether incumbents performed consistently well or poorly in certain states over time, or whether their performance in different states was subject to the volatility in states (i.e. is incumbent performance consistent even in states considered &#34;battleground&#34; between parties?)&#xA;&lt;h2&gt;Results&lt;/h2&gt;&#xA;&lt;p&gt;First, I decided to investigate whether particular states tend to vote for incumbent parties more often than others. The maps below show each state that voted for an incumbent party versus a challenger party&amp;rsquo;s candidate in every election since 1948.&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Forecast 09/21/2024</title>
       <link>http://localhost:4321/election-blog/post/2024/09/21/week-3-forecast/</link>
