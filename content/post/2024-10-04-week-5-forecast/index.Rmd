@@ -1,5 +1,5 @@
 ---
-title: Week 5 Forecast
+title: Forecast 10/07/2024
 author: Catherine Stanton
 date: '2024-10-04'
 slug: week-5-forecast
@@ -58,3 +58,101 @@ ggplot(data=edu_data, aes(x=Year, y=Turnout, fill=Education)) +
   ggtitle("Voter Turnout by Education Level Over Time")
 ```
 
+The peaks on the plots above make sense given that this data contains general elections and midterm elections. Turnout tends to be higher, and voters tend to be more excited, across demographics when voting for president as opposed to another office.
+
+I joined these datasets and appended one containing Democratic Vote Share in each of the presidential elections. To reduce the oscillatory effect observed above, I only keep the presidential election data from here forward, but it was informative to see that the trends in turnout prevailed during all election types and years.
+
+```{r, warning=F, echo=F}
+voteshare_data <- read.csv("popvote_1948-2020.csv")
+
+dem_vote_share <- subset(voteshare_data, party=="democrat")
+
+joined_data <- dem_vote_share %>%
+                  select(year, pv2p) %>%
+                  filter(year >= 1988) %>%
+                  left_join(subset(age_data, Age=="18-29"), by=join_by(year==Year), copy=TRUE) %>%
+                  rename(Turnout18_29 = Turnout, Share18_29 = Share.of.Electorate) %>%
+                  left_join(subset(age_data, Age=="30-44"), by=join_by(year==Year), copy=TRUE) %>%
+                  rename(Turnout30_44 = Turnout, Share30_44 = Share.of.Electorate) %>%
+                  left_join(subset(age_data, Age=="45-59"), by=join_by(year==Year), copy=TRUE) %>%
+                  rename(Turnout45_59 = Turnout, Share45_59 = Share.of.Electorate) %>%
+                  left_join(subset(age_data, Age=="60+"), by=join_by(year==Year), copy=TRUE) %>%
+                  rename(Turnout60 = Turnout, Share60 = Share.of.Electorate) %>%
+                  left_join(subset(race_data, Race=="Non-Hispanic White"), by=join_by(year==Year), copy=TRUE) %>%
+                  rename(TurnoutWhite = Turnout, ShareWhite = Share.of.Electorate) %>%
+                  left_join(subset(race_data, Race=="Non-Hispanic Black"), by=join_by(year==Year), copy=TRUE) %>%
+                  rename(TurnoutBlack = Turnout, ShareBlack = Share.of.Electorate) %>%
+                  left_join(subset(race_data, Race=="Hispanic"), by=join_by(year==Year), copy=TRUE) %>%
+                  rename(TurnoutHispanic = Turnout, ShareHispanic = Share.of.Electorate) %>%
+                  left_join(subset(race_data, Race=="Other"), by=join_by(year==Year), copy=TRUE) %>%
+                  rename(TurnoutOther = Turnout, ShareOther = Share.of.Electorate) %>%
+                  left_join(subset(edu_data, Education=="Less Than High School"), by=join_by(year==Year), copy=TRUE) %>%
+                  rename(TurnoutLHS = Turnout, ShareLHS = Share.of.Electorate) %>%
+                  left_join(subset(edu_data, Education=="High School Grad"), by=join_by(year==Year), copy=TRUE) %>%
+                  rename(TurnoutHS = Turnout, ShareHS = Share.of.Electorate) %>%
+                  left_join(subset(edu_data, Education=="Some College to College Grad"), by=join_by(year==Year), copy=TRUE) %>%
+                  rename(TurnoutCollege = Turnout, ShareCollege = Share.of.Electorate) %>%
+                  left_join(subset(edu_data, Education=="Post-Graduate"), by=join_by(year==Year), copy=TRUE) %>%
+                  rename(TurnoutPG = Turnout, SharePG = Share.of.Electorate) %>%
+                  select(year, pv2p, Turnout18_29, Share18_29, Turnout30_44, Share30_44, Turnout45_59, Share45_59, Turnout60, Share60, TurnoutWhite, ShareWhite, TurnoutBlack, ShareBlack, TurnoutHispanic, ShareHispanic, TurnoutOther, ShareOther, TurnoutLHS, ShareLHS, TurnoutHS, ShareHS, TurnoutCollege, ShareCollege, TurnoutPG, SharePG) %>%
+                  na.exclude()
+```
+
+
+<h2>Analysis&Results</h2>
+First, I fit some line plots to see if there were observable relationships between a demographic group's turnout and democratic vote share.
+
+```{r, echo=F}
+library(modelsummary)
+
+ggplot(data=joined_data, aes(y=pv2p)) +
+  geom_point(aes(x=TurnoutWhite, color="White")) +
+  geom_point(aes(x=TurnoutBlack, color="Black")) +
+  geom_point(aes(x=TurnoutHispanic, color="Hispanic")) +
+  geom_point(aes(x=TurnoutOther, color="Other Race")) +
+  ylab("Democratic Vote Share") +
+  xlab("Turnout Rate") +
+  ggtitle("Turnout of Racial Groups and Democratic Vote Share")
+
+ggplot(data=joined_data, aes(y=pv2p)) +
+  geom_point(aes(x=Turnout18_29, color="18-29")) + 
+  geom_point(aes(x=Turnout30_44, color="30-44")) +
+  geom_point(aes(x=Turnout45_59, color="45-59")) + 
+  geom_point(aes(x=Turnout60, color="60+")) +
+  ylab("Democratic Vote Share") +
+  xlab("Turnout Rate") +
+  ggtitle("Turnout of Age Groups and Democratic Vote Share")
+
+ggplot(data=joined_data, aes(y=pv2p)) +
+  geom_point(aes(x=TurnoutLHS, color="Less than High School")) + 
+  geom_point(aes(x=TurnoutHS, color="High School")) +
+  geom_point(aes(x=TurnoutCollege, color="Collge")) + 
+  geom_point(aes(x=TurnoutPG, color="Post-Grad")) +
+  ylab("Democratic Vote Share") +
+  xlab("Turnout Rate") +
+  ggtitle("Turnout of Education Levels and Democratic Vote Share")
+```
+
+An interesting result of the plots above are that, turnout rates among different education levels are highlight stratified, and that democratic vote share varies despite the differently-educated voters turning out in similar numbers from election-to-election. This indicates that the turnout of a certain educational group is *not* a good predictor of democratic vote share: The turnout rates of education levels do not vary to the extent that democratic vote share varies, and they certainly do not vary *together.* Thus, I will exclude education data from here forward.
+
+Next I fit a multiple linear regression to determine which of the remaining *8* predictors (the four races and four age groups) are most predictive of democratic vote share.
+
+```{r, warning=F, echo = F}
+big_lm <- lm(pv2p ~ Turnout18_29 + Turnout30_44 + Turnout45_59 + Turnout60 + TurnoutWhite + TurnoutBlack + TurnoutHispanic + TurnoutOther, data=joined_data)
+
+modelsummary(big_lm)
+```
+
+To hone the model even further and reduce the effect of the intercept, I'll focus on the most salient predictors, which were turnout of people aged 45 and over, the White turnout, and the turnout of Hispanic and voters belonging to "Other" racial groups. It's worth noting that, on the whole, age group turnouts served as better predictors of democratic vote share than racial turnouts.
+
+
+```{r, warning=F, echo = F}
+honed_lm <- lm(pv2p ~ Turnout45_59 + Turnout60 + TurnoutWhite + TurnoutHispanic + TurnoutOther, data=joined_data)
+
+
+summary(honed_lm)
+```
+
+When we take out other, extraneous predictors, the effects of the remaining 2 age groups and 3 racial groups become closer to each other. When there is higher Hispanic turnout, Democrats tend to perform better. The same is true for higher turnout of people above age 45. But for higher White turnout and turnout of "other" racial groups, Democratic candidates tend to perform worse.
+
+With data about the likelihood of different age groups and racial groups voting in 2024, the correlations found here could be employed to predict Democratic Vote Share. Such polls, about individuals' voting plans/mail-in ballot status are important and I hope to see them increase as voter registration deadlines in multiple states come up *this week* and we keep nearing the election. Overall, estimating candidate performance based on polls and demographics is not effective if the people polled do not turn out to vote, so an investigation such as this one, about candidate performance at various turnout levels among demographic groups can be combined with predictions of the propensity to vote for people in the demographic groups for better candidate performance predictions.
