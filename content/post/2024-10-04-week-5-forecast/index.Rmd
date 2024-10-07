@@ -140,7 +140,7 @@ Next I fit a multiple linear regression to determine which of the remaining *8* 
 ```{r, warning=F, echo = F}
 big_lm <- lm(pv2p ~ Turnout18_29 + Turnout30_44 + Turnout45_59 + Turnout60 + TurnoutWhite + TurnoutBlack + TurnoutHispanic + TurnoutOther, data=joined_data)
 
-modelsummary(big_lm)
+summary(big_lm)
 ```
 
 To hone the model even further and reduce the effect of the intercept, I'll focus on the most salient predictors, which were turnout of people aged 45 and over, the White turnout, and the turnout of Hispanic and voters belonging to "Other" racial groups. It's worth noting that, on the whole, age group turnouts served as better predictors of democratic vote share than racial turnouts.
