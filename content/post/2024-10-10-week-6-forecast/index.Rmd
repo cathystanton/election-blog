@@ -11,12 +11,12 @@ tags: []
 This blog is an ongoing project for Professor Ryan Enos' Election Analytics Course at Harvard College (GOV 1347, Fall 2024). It will be updated weekly with posts analyzing how different features impact the likelihood of Kamala Harris (D) or Donald Trump (R) winning the 2024 U.S. Presidential Election or winning specific states in the election. The blog will culminate in a final predictive model for the outcome of the general election.
 
 <h2>Context & Question</h2>
-The focus of this week's post is campaign advertising. I decided to do a callback to the post from September 30th and investigate the difference
+The focus of this week's post is campaign advertising. I decided to do a callback to the post from September 30th and investigate the difference between incumbent candidates and challenger candidates when it comes to advertising. Do ad tones change for incumbent candidates and challengers? Are the tones of advertisements markedly different for successful candidates versus unsuccessful ones?
 
 <h2>Exploratory Analysis</h2>
 Before I investigate the relationships between ad tone and incumbency, I want to expose some of the trends in campaign ads since the 2000 election.
 
-```{r, echo=F}
+```{r, echo=F, warning=F, include=F}
 library(ggplot2)
 library(tidyverse)
 
@@ -31,7 +31,7 @@ ec_data <- read.csv("corrected_ec_1948_2024.csv")
 
 First we can get an idea of *why* campaigns run ads. The following plot shows the distributions of campaign motives for Democratic and Republican candidates in the elections between 200 and 2016. Candidates could run "personal," versus "policy," versus "other" ads. Both parties' candidates *tended* to air ads that focused on policy, a trend that was broken in 2016 when candidate Donald Trump devoted a significant majority of his advertising to personal issues/causes.
 
-```{r, warning=F, echo=F}
+```{r, warning=F, echo=F, include=F}
 ads_campaign %>%
   left_join(ads_creative) %>%
   group_by(cycle, party) %>% mutate(tot_n=n()) %>% ungroup() %>%
