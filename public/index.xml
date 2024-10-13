@@ -6,8 +6,15 @@
     <description>Recent content in Home on GOV 1347: Election Analytics Blog</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Fri, 04 Oct 2024 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 10 Oct 2024 00:00:00 +0000</lastBuildDate>
     <atom:link href="http://localhost:4321/election-blog/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Forecast 10/14/2024</title>
+      <link>http://localhost:4321/election-blog/post/2024/10/10/week-6-forecast/</link>
+      <pubDate>Thu, 10 Oct 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:4321/election-blog/post/2024/10/10/week-6-forecast/</guid>
+      <description>&lt;h1&gt;Week 6: October 14, 2024&lt;/h1&gt;  &#xA;This blog is an ongoing project for Professor Ryan Enos&#39; Election Analytics Course at Harvard College (GOV 1347, Fall 2024). It will be updated weekly with posts analyzing how different features impact the likelihood of Kamala Harris (D) or Donald Trump (R) winning the 2024 U.S. Presidential Election or winning specific states in the election. The blog will culminate in a final predictive model for the outcome of the general election.&#xA;&lt;h2&gt;Context &amp; Question&lt;/h2&gt;&#xA;The focus of this week&#39;s post is campaign advertising. I decided to do a callback to the post from September 30th and investigate the difference&#xA;&lt;h2&gt;Exploratory Analysis&lt;/h2&gt;&#xA;Before I investigate the relationships between ad tone and incumbency, I want to expose some of the trends in campaign ads since the 2000 election.&#xA;&lt;pre&gt;&lt;code&gt;## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──&#xA;## ✔ dplyr     1.1.3     ✔ readr     2.1.5&#xA;## ✔ forcats   1.0.0     ✔ stringr   1.5.0&#xA;## ✔ lubridate 1.9.3     ✔ tibble    3.2.1&#xA;## ✔ purrr     1.0.2     ✔ tidyr     1.3.0&#xA;## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──&#xA;## ✖ dplyr::filter() masks stats::filter()&#xA;## ✖ dplyr::lag()    masks stats::lag()&#xA;## ℹ Use the conflicted package (&amp;lt;http://conflicted.r-lib.org/&amp;gt;) to force all conflicts to become errors&#xA;&lt;/code&gt;&lt;/pr</description>
+    </item>
     <item>
       <title>Forecast 10/07/2024</title>
       <link>http://localhost:4321/election-blog/post/2024/10/04/week-5-forecast/</link>
