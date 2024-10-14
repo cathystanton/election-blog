@@ -31,7 +31,7 @@ ec_data <- read.csv("corrected_ec_1948_2024.csv")
 
 First we can get an idea of *why* campaigns run ads. The following plot shows the distributions of campaign motives for Democratic and Republican candidates in the elections between 200 and 2016. Candidates could run "personal," versus "policy," versus "other" ads. Both parties' candidates *tended* to air ads that focused on policy, a trend that was broken in 2016 when candidate Donald Trump devoted a significant majority of his advertising to personal issues/causes.
 
-```{r, warning=F, echo=F, include=F}
+```{r, warning=F, echo=F, results='hide'}
 ads_campaign %>%
   left_join(ads_creative) %>%
   group_by(cycle, party) %>% mutate(tot_n=n()) %>% ungroup() %>%
@@ -58,7 +58,7 @@ ads_campaign %>%
 
 Next, I wonder how ad tone corresponds to candidate success. Below are two plots, one showing the ad tones of all winning candidates in elections since 2000 and one showing the tones of all losing candidates since 2000. Ad tones were classified as "attacking" one's opponent, "promoting" oneself, or "contrasting" oneself with the opponent in this dataset. 
 
-```{r, echo=F}
+```{r, echo=F, warning=F, results='hide'}
 ads_campaign <- ads_campaign %>% mutate(winner = case_when((cycle=="2000" | cycle=="2004") & party=="republican" ~ TRUE,
                                                            (cycle=="2008" | cycle=="2012") & party=="democrat" ~ TRUE,
                                                            .default=FALSE)) 
@@ -82,13 +82,13 @@ As we can see the 2004 and 2012 elections were marked by attacks whereas the 200
 <h2>Incorporating Incumbency</h2>
 I decided to investigate how incumbency influences a candidate's tone in advertisements. Given that incumbent candidates have the advantage of 4-years of publicity and media spotlight that their opponents do not, I though that may manifest difference in ad tone. Further, incumbent candidates sometimes run on different issues that challengers (e.g. many presidents running for a first term focus on domestic politics while many running for reelection focus on foreign policy). Different issues may be more partial/conducive to different ad tones. Lastly, incumbent candidates probably have an advantage in portraying the previous four years in a very positive light while challengers likely have an advantage in pointing out its problems. This would seem to correspond quite directly to ad tone.
 
-```{r, echo=F, warning=F}
+```{r, echo=F, warning=F, include=F}
 ads_campaign <- ads_campaign %>% mutate(incumbent = case_when((cycle=="2004" | cycle=="2008") & party=="republican" ~ TRUE,
                                                            (cycle=="2000" | cycle=="2012") & party=="democrat" ~ TRUE,
                                                            .default=FALSE))
 ```
 
-```{r, echo=F, warning=F}
+```{r, echo=F, warning=F, results='hide'}
 ads_campaign %>%
   group_by(cycle, incumbent) %>% mutate(tot_n=n()) %>% ungroup() %>%
   group_by(cycle, incumbent, ad_tone) %>% summarize(pct=n()*100/first(tot_n)) %>%

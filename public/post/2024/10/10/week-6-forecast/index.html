@@ -31,19 +31,9 @@
 <h1>Week 6: October 14, 2024</h1>  
 This blog is an ongoing project for Professor Ryan Enos' Election Analytics Course at Harvard College (GOV 1347, Fall 2024). It will be updated weekly with posts analyzing how different features impact the likelihood of Kamala Harris (D) or Donald Trump (R) winning the 2024 U.S. Presidential Election or winning specific states in the election. The blog will culminate in a final predictive model for the outcome of the general election.
 <h2>Context & Question</h2>
-The focus of this week's post is campaign advertising. I decided to do a callback to the post from September 30th and investigate the difference
+The focus of this week's post is campaign advertising. I decided to do a callback to the post from September 30th and investigate the difference between incumbent candidates and challenger candidates when it comes to advertising. Do ad tones change for incumbent candidates and challengers? Are the tones of advertisements markedly different for successful candidates versus unsuccessful ones?
 <h2>Exploratory Analysis</h2>
 Before I investigate the relationships between ad tone and incumbency, I want to expose some of the trends in campaign ads since the 2000 election.
-<pre><code>## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-## ✔ dplyr     1.1.3     ✔ readr     2.1.5
-## ✔ forcats   1.0.0     ✔ stringr   1.5.0
-## ✔ lubridate 1.9.3     ✔ tibble    3.2.1
-## ✔ purrr     1.0.2     ✔ tidyr     1.3.0
-## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-## ✖ dplyr::filter() masks stats::filter()
-## ✖ dplyr::lag()    masks stats::lag()
-## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors
-</code></pre>
 <p>First we can get an idea of <em>why</em> campaigns run ads. The following plot shows the distributions of campaign motives for Democratic and Republican candidates in the elections between 200 and 2016. Candidates could run &ldquo;personal,&rdquo; versus &ldquo;policy,&rdquo; versus &ldquo;other&rdquo; ads. Both parties&rsquo; candidates <em>tended</em> to air ads that focused on policy, a trend that was broken in 2016 when candidate Donald Trump devoted a significant majority of his advertising to personal issues/causes.</p>
 <pre><code>## Joining with `by = join_by(creative, party, cycle)`
 ## `summarise()` has grouped output by 'cycle', 'party'. You can override using
