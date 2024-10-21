@@ -19,3 +19,5 @@ CONTENTS
 [Week 4](https://cathystanton.github.io/election-blog/post/2024/09/29/week-4-forecast/): In this week's post, I explore the effect of incumbency on candidate success and strategy in presidential campaigns since 1948. In particular, I look to see if certain states vote for incumbent candidates more often than others, regardless of partisanship, and evaluate whether campaigns should take that into account when allocating funds/resources. 
 
 [Week 6](https://cathystanton.github.io/election-blog/post/2024/10/10/week-6-forecast/): In this week's post, I look at why candidates run ads and investigate differences between ad tones in incumbent and challenger candidates, and successful and unsuccessful candidates (based on electoral college outcome).
+
+[Week 7](https://cathystanton.github.io/election-blog/post/2024/10/18/week-7-forecast/): In this week's post, I explore Bayesian models and propose adjusting polling predictions based on early election returns. This is an exercise I hope to repeat (in the spirit of continuous Bayesian updating) once the data on both recent polls and early voting returns are more complete.
