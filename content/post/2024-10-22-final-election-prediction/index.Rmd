@@ -1,0 +1,14 @@
+---
+title: Final Election Prediction
+author: Cathy Stanton
+date: '2024-10-22'
+slug: final-election-prediction
+categories: []
+tags: []
+---
+
+<h2>Final Predictive Model for the 2024 Election</h2>
+- state-by-state. rationale: calcification.
+- bayesian. rationale: "likely voters" become voters.
+- what is the role of "fear" / how close an election is?
+
