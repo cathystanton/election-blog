@@ -100,7 +100,18 @@ The first step in a principle component analysis is to normalize each column of 
 </code></pre>
 <p>The principal component analysis of all states and races in the dataset indicates that 90% of the variance in 2-party vote share can be explained by the first 13 (out of 63) principal components. That goes a LONG way in reducing the dimensionality of the dataset, and still allows us to factor in economic data, turnout trends, demographic data, and polling averages into our prediction. To explain 99% of the variance, we only need to use 30 principal components. In the final prediction, I seek to repreat this PCA on a state-by-state basis, predict a probability that the Democratic Candidate will win, treat it as a prior, and then update it based on the latest early voting returns.</p>
 <h2> Bonus Content!</h2>
-Since the PCA will be expanded on in my final election prediction, I wanted to provide a few relevant visuals and predictions to help us better understand the state of the 2024 Election. It's been a few weeks since I made predictions based on polling, and I wanted to practice pulling data from Fivethirtyeight, so here are some visuals and explanations about the current state of the U.S. Presidential and *Senate* Races.
+Since the PCA will be expanded on in my final election prediction, I wanted to provide a few relevant visuals and predictions to help us better understand the state of the 2024 Election. It's been a few weeks since I made predictions based on polling, and I wanted to practice pulling data from Fivethirtyeight, so here are some visuals and explanations about the current polling and approval ratings for candidates in the U.S. Presidential Election. The first is approval rating for Congress, the Supreme Court, the President, and the Vice President over the past 4 years. As we can see, Congress had a markedly lower approval rating than the other 3 institutions/politicians, which I wasn't expecting. This is surprising because congressional elections are held more frequently than presidential elections so I would think that the people expressing their approval/disapproval would have a say over congress members more often. The approval rating of the Supreme Court fluctuated most steeply, but if you look closely, you can see it fluctuate *with* the approval rating of Congress, rising and falling together. This may indicate something about how everyday Americans answering approval polls conceptualize the Executive Branch of government versus the Judicial and Legislative.
+<pre><code>## 
+## Attaching package: 'maps'
+</code></pre>
+<pre><code>## The following object is masked from 'package:purrr':
+## 
+##     map
+</code></pre>
+<pre><code>## `geom_smooth()` using method = 'gam' and formula = 'y ~ s(x, bs = &quot;cs&quot;)'
+</code></pre>
+<img src="/election-blog/post/2024/10/28/week-8-forecast/index_files/figure-html/unnamed-chunk-3-1.png" width="672" />
+<p>Unsurprisingly, the approval ratings for Joe Biden and Kamala Harris varied together. This makes sense because they make up the leadership of the same administration (or at least they are the most visible figures). However, we see the approval rating for Kamala Harris spike towards the end of the 4-year term&hellip; around when she began her presidential campaign. This is interesting because this poll is based on her work in office, not her campaign. So it suggests that, by running for the presidency, she developed a more favorable impression about her work in the Biden Administration, among everyday Americans. This could be the result of her having a greater platform to talk about the work, her gaining more visibility, or Americans becoming optimistic about her chance at the presidency.</p>
 
 </main>
 
