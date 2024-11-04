@@ -1,14 +1,297 @@
 ---
-title: Final Election Prediction
-author: Cathy Stanton
-date: '2024-10-22'
-slug: final-election-prediction
+title: "Final Election Prediction"
+author: "Cathy Stanton"
+date: "2024-11-04"
+output: pdf_document
 categories: []
 tags: []
+slug: "final-election-prediction"
 ---
 
 <h2>Final Predictive Model for the 2024 Election</h2>
-- state-by-state. rationale: calcification.
-- bayesian. rationale: "likely voters" become voters.
-- what is the role of "fear" / how close an election is?
+For my final election prediction, I performed OLS regressions for each state, based on the predictors that best explained each state's variance. I compiled a dataset with variables about candidate performance since 1972, as well as demographic data, economic data, historical turnout trends, ad spending, and polling, in each state. Then I fit an OLS model to each state, on all of the features, and chose the 5 with the highest $R^2$ values. The $R^2$ statistic measures how much variation in an outcome (like democratic vote share) can be explained by the given predictor. So by choosing to build a linear model based on predictors with high $R^2$ values in each state, I hope to use the least possible predictors to capture the most possible nuance in each state.  
+Then I fit another model on each state, using just the selected predictors based on $R^2$. To make the final predictons, I compiled a dataset of the same predictors, but from 2024, and predicted each state's 2-Party Democratic Vote Share from a multilinear regression for each state. It's important to note that, using this method, each state winds up having a different set of predictors used in its model.  
+The reasons for using a state-by-state model and different predictors per state are both rooted in calcification. Calcification is the idea that, in the United States, the major political parties receive about equal public support, and winning an election is therefore about attaining a geographic spread of votes rather than the highest sum of votes.
+
+```{r, warning = F, echo=F, message=F}
+library(tidyverse)
+
+# load data
+ads_spending <- read.csv("ad_campaigns_2000-2012.csv")
+approval <- read.csv("approval_averages.csv")
+demographics <- read.csv("demographics.csv")
+gdp_growth <- read.csv("fred_gdp_growth_quarterly_national_1947_2024.csv") 
+rdpi <- read.csv("fred_rdpi_national_1959_2024.csv") 
+unemployment <- read.csv("fred_unemployment_national_1948_2024.csv") 
+cpi <- read.csv("fred_CPI_urban_monthly_1947_2024.csv") 
+turnout <- read.csv("state_turnout_1980_2022.csv")
+state_popvote <- read.csv("state_popvote_1948_2020.csv") %>% select(year, state, D_pv, R_pv, D_pv2p, R_pv2p, votes_D, votes_R, total_votes, two_party_votes)
+state_polls <- read.csv("state_polls_1968-2024.csv") %>% filter(year <= 2020)
+incumbency <- read.csv("popvote_1948-2020.csv")
+ec_data <- read.csv("corrected_ec_1948_2024.csv") %>% select(state, stateab, year)
+
+# clean FRED Dates for joining
+gdp_growth$DATE <- as.Date(gdp_growth$DATE, format="%m/%d/%Y") %m+% years(1900)
+for (i in 1:nrow(gdp_growth)) {
+  if (gdp_growth$DATE[i] <= as.Date("1925-01-01", format="%Y-%m-%d")) {
+    gdp_growth$DATE[i] = gdp_growth$DATE[i] %m+% years(100)
+  }
+}
+
+gdp_growth_early <- gdp_growth %>% mutate(year=year(as.Date(DATE, format="%Y-%m-%d"))) %>% filter(year <= 2022)
+
+cpi$DATE <- as.Date(cpi$DATE, format="%Y-%m-%d")
+rdpi$DATE <- as.Date(rdpi$DATE, format="%Y-%m-%d")
+unemployment$DATE <- as.Date(unemployment$DATE, format="%Y-%m-%d")
+
+cpi_early <- cpi %>% mutate(year=year(as.Date(DATE, format="%Y-%m-%d"))) %>% filter(year <= 2022)
+rdpi_early <- rdpi %>% mutate(year=year(as.Date(DATE, format="%Y-%m-%d"))) %>% filter(year <= 2022)
+unemployment_early <- unemployment %>% mutate(year=year(as.Date(DATE, format="%Y-%m-%d"))) %>% filter(year <= 2022)
+
+econ_data <- cpi_early %>%
+              left_join(gdp_growth_early %>% select(-year), join_by(DATE)) %>%
+              left_join(unemployment_early %>% select(-year), join_by(DATE)) %>%
+              left_join(rdpi_early %>% select(-year), join_by(DATE))
+colnames(econ_data) <- c("DATE", "cpi", "year", "gdp_growth", "unemployment_rate", "rdpi")
+
+# clean up econ data to join
+# econ_data <- econ_data %>% mutate(year=year(DATE))
+
+# clean non-numeric columns in turnout
+turnout$vep_turnout <- as.numeric(strsplit(turnout$vep_turnout, "%"))
+turnout$prison <- as.numeric(str_replace_all(turnout$prison, ",", ""))
+turnout$probation <- as.numeric(str_replace_all(turnout$probation, ",", ""))
+turnout$parole <- as.numeric(str_replace_all(turnout$parole, ",", ""))
+turnout$total_ineligible <- as.numeric(str_replace_all(turnout$total_ineligible, ",", ""))
+turnout$overseas_eligible <- as.numeric(str_replace_all(turnout$overseas_eligible, ",", ""))
+turnout$noncitizen <- as.numeric(strsplit(turnout$noncitizen, "%"))
+turnout$vep <- as.numeric(str_replace_all(turnout$vep, ",", ""))
+turnout$total_ballots <- as.numeric(str_replace_all(turnout$total_ballots, ",", ""))
+
+# clean up ads_spending information
+ads_spending <- ads_spending %>% select(cycle, party, state, total_cost) %>%
+                  group_by(state, cycle, party) %>%
+                  mutate(amt_spent=sum(total_cost)) %>% select(-total_cost) %>% unique()
+ads_spending_d <- ads_spending %>% filter(party=="democrat") %>% mutate(amt_spent_d=amt_spent) %>% select(-amt_spent)
+ads_spending_r <- ads_spending %>% filter(party=="republican") %>% mutate(amt_spent_r=amt_spent) %>% select(-amt_spent)
+ads_spending <- ads_spending_d %>% left_join(ads_spending_r, join_by(state, cycle)) %>% select(-party.x, -party.y)
+
+# make a big dataset for individual PCAs
+big_data <- ec_data %>% left_join(state_popvote, join_by(state, year)) %>% left_join(state_polls, join_by(state, year)) %>%
+  left_join(turnout, join_by(state, year)) %>% left_join(demographics, join_by(state, year)) %>% left_join(econ_data %>% select(-DATE), join_by(year)) %>% left_join(ads_spending, join_by(stateab==state, year==cycle))
+
+# get some summary statistics
+big_data <- big_data %>%
+              group_by(state, year, candidate) %>%
+              filter(party=="DEM") %>%
+              mutate(polling_avg_d=mean(poll_support)) %>%
+              ungroup()
+
+big_data <- big_data %>%
+              group_by(year) %>%
+              mutate(avg_rdpi=mean(rdpi, na.rm=T),
+                     avg_gdp_growth=mean(gdp_growth, na.rm=T),
+                     avg_cpi=mean(cpi, na.rm=T),
+                     avg_unemployment=mean(unemployment_rate, na.rm=T)) %>%
+              ungroup()
+
+
+big_data <- big_data %>% select(state, stateab, year, D_pv, D_pv2p, vep_turnout, vep, total_ballots, noncitizen, parole, prison, probation, total_ineligible, overseas_eligible, total_pop, white, black, american_indian, asian_pacific_islander, other_race, two_or_more_races, hispanic_white, hispanic_black, hispanic_american_indian, hispanic_asian_pacific_islander, hispanic_other_race, hispanic_two_or_more_races, under_5, age_5_to_9, age_10_to_14, age_15_to_17, age_18_to_19, age_20, age_21, age_22_to_24, age_25_to_29, age_30_to_34, age_35_to_44, age_45_to_54, age_55_to_59, age_60_to_61, age_62_to_64, age_65_to_74, age_75_to_84, age_85_and_over, less_than_college, bachelors, graduate, under18, avg_cpi, avg_gdp_growth, avg_unemployment, avg_rdpi, polling_avg_d, amt_spent_d, amt_spent_r) %>% filter(state!="District Of Columbia")
+
+```
+
+<h2>The Data</h2>
+For this model, I made a dataset with over 50 predictors. It goes back to the election of 1972 and includes metrics about candidate polling averages; national CPI, GDP Growth, Unemployment Rate, and RDPI; education level, age distribution, and race by state; ads spending by state; previous turnout; and previous candidate performance. In cases where I had missing values, I decided to impute the column mean. 
+
+```{r, warning=F, echo=F}
+library(corrr)
+library(purrr)
+
+# impute column mean for NA values, with help from AI
+for (col in colnames(big_data)) {
+  big_data[[col]][is.na(big_data[[col]])] <- mean(big_data[[col]], na.rm = TRUE)
+}
+
+```
+
+
+```{r, warning=F, echo=F}
+# iterate over states, doing OLS in each, find greatest R^squared
+state_greatest_R_squared <- list()
+state_predictors <- list()
+
+for (state_idx in 1:50) {
+  state_data <- subset(big_data, state==unique(big_data$state)[state_idx])
+  R_squareds <- list()
+  for (i in 6:56) {
+    model <- lm(state_data$D_pv2p ~ state_data[[colnames(big_data)[i]]])
+    # save model results
+    R_squareds[[i]] <- c(colnames(big_data)[i], summary(model)$r.squared)
+  }
+  R_squareds <- sapply(R_squareds, function(x) as.numeric(x[2]))
+  # find and save the top 3 greatest R_squareds
+  numeric_R_squareds <- sapply(R_squareds, function(x) x[1])
+  state_greatest_R_squared[[state_idx]] <- sort(numeric_R_squareds, decreasing=T)[1:5]
+  state_predictors[[state_idx]] <- order(numeric_R_squareds, decreasing=T)[1:5]
+}
+
+# model training by state
+model_summaries <- list()
+
+for (state_idx in 1:50) {
+  state_data <- subset(big_data, state==unique(big_data$state)[state_idx])
+  state_model <- lm(state_data$D_pv2p ~ state_data[[colnames(state_data)[state_predictors[[state_idx]][1]]]] + state_data[[colnames(state_data)[state_predictors[[state_idx]][2]]]] + state_data[[colnames(state_data)[state_predictors[[state_idx]][3]]]] + 
+state_data[[colnames(state_data)[state_predictors[[state_idx]][4]]]] + state_data[[colnames(state_data)[state_predictors[[state_idx]][5]]]])
+
+  model_summaries[[state_idx]] <- state_model
+}
+
+```
+
+Below is a table showing which predictors had the highest $R^2$ values for each state. In this model, I chose to use the 5 highest $R^2$ values, but there is room to fine-tune the model here. I could (1) vary the number of predictors used from each state, based on a threshold for the $R^2$ value of the predictor, or based on a parameter (like the amount of variance explained before I stop incorporating new predictors). This might help make the features in each of my state-level models more uniform in terms of the variance they explain. Or I could (2) experiment changing the number of predictors used in all the states, but keep it the same between them and settle on a number of $R^2$ predictors that provides predictions I'm happy with for *most* states.
+
+```{r, echo=F}
+predictors_used <- data.frame(unique(big_data$state))
+colnames(predictors_used) <- "state"
+
+for (i in 1:50) {
+  predictors_used$Predictor_1[i] <- colnames(big_data)[state_predictors[[i]][1]]
+  predictors_used$Predictor_2[i] <- colnames(big_data)[state_predictors[[i]][2]]
+  predictors_used$Predictor_3[i] <- colnames(big_data)[state_predictors[[i]][3]]
+  predictors_used$Predictor_4[i] <- colnames(big_data)[state_predictors[[i]][4]]
+  predictors_used$Predictor_5[i] <- colnames(big_data)[state_predictors[[i]][5]]
+}
+
+print(predictors_used)
+```
+
+Next, I gathered data about the 2024 Election Cycle, akin to what I had from previous cycles, and predicted the Democratic 2-Party Vote share. for the Voting Eligible Population and Number of Ballots cast, I used the forecasts by [Michael McDonald](https://michaelmcdonald.substack.com/p/2024-turnout-forecast?r=chfet&utm_campaign=post&utm_medium=web&triedRedirect=true) since data about this doesn't exist yet from 2024. I did however make my own forecast for voter turnout in each state based on early voting rates in 2024. I took early voting rates from November 2, 2020 and November 2, 2024 from the [University of Florida's Election Lab](https://election.lab.ufl.edu/early-vote/2024-early-voting/). Then I created a multiplier to project total votes from early votes, by dividing the total votes cast in each state in 2020 by the number of early votes cast in the state in 2020.  
+There is potential that the number of early ballots cast in 2020 may be higher OR lower than the number of early ballots cast in 2024. An argument for why they might be higher would be that the COVID crisis was at a peak in 2020, and any people used early/mail-in voting as an opportunity to avoid crowded polling places on election day, out fo public health concerns. A reason why the number of early ballots cast in 2020 would be lower than those in 2024 however is that, in 2024, people are more familiar with the early/mail-in voting process than they were in 2020, so they may be more inclined to use it. Similarly, on a state-by-state basis, if states changed their mail-in and early voting policies between 2020 and 2024, it may have been easier to vote early in one year than the other, leading to differing recorded numbers of people turning out early.
+
+
+```{r, warning=F, echo=F, message=F}
+# make 2024 data and predict
+
+# for 2024 turnout projection: use early voting data. multiplier: total_2020_turnout / early_2020_turnout. early_2024_turnout * multiplier
+turnout_2020 <- subset(turnout, year==2020) %>% filter(!state %in% c("United States", "District of Columbia"))
+turnout_2020$total_ballots <- as.numeric(str_replace_all(turnout_2020$total_ballots, ",", ""))
+turnout_2020$vep <- as.numeric(str_replace_all(turnout_2020$vep, ",", ""))
+# From the University of Florida Electon Lab
+early_turnout_2020 <- data.frame(c("Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"), c(300402, 152585, 2471577, 912688, 12090534, 2887605, 636000, 148424, 8974896, 4013155, 484000, 402310, 3591646, 1328039, 996981, 770324, 1508000, 977408, 499939, 2178906, 2352945, 2841696, 1716575, 231031, 827978, 529168, 482919, 1122970, 181577, 3658460, 788175, 3743745, 977186, 251484, 3000827, 444729, 2155350, 2629672, 305724, 1309598, 202464, 2280747, 9719101, 1124206, 255141, 1796080, 3545289, 136038, 1924838, 131516))
+colnames(early_turnout_2020) <- c("state", "early_votes")
+all_turnout_2020 <- turnout_2020 %>% left_join(early_turnout_2020, join_by(state)) %>% mutate(multipliers = total_ballots / early_votes)
+early_turnout_2024 <- data.frame(c("Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"), c(300402, 89545, 2218682, 688733, 7636389, 2080015, 786892, 229025, 8184680, 4017401, 331614, 377041, 2131107, 1164276, 553804, 576610, 587971, 969276, 341122, 1593419, 1632495, 2983444, 989807, 119818, 303843, 386015, 303116, 1077285, 181577, 1768812, 663874, 2610238, 4452192, 172927, 2353487, 392693, 1168083, 1739606, 190151, 1451178, 141554, 2214863, 8936039, 828953, 201371, 2008586, 2362291, 264187, 1499164, 62596), c(3851818, 534612, 5389840, 2225513, 26008952, 4431349, 2666824, 773380, 16494837, 7760407, 1038796, 1446228, 9020606, 5071615, 2365182, 2127448, 3365030, 3325888, 1134693, 4419071, 5163699, 7645405, 4285809, 2175783, 4662988, 897964, 1420287, 2261177, 1122920, 6428021, 1558389, 13867180, 8140132, 589501, 8947886, 2956347, 3208533, 9904635, 827146, 4129733, 681957, 5345960, 20152824, 2378578, 526015, 6374775, 5645581, 1389555, 4484824, 442437), c(2250000, 355000, 3550000, 1210000, 16800000, 3300000, 1775000, 495000, 11750000, 5400000, 570000, 900000, 5800000, 3040000, 1650000, 1380000, 2100000, 2000000, 820000, 3040000, 3550000, 3650000, 3300000, 1250000, 2975000, 610000, 960000, 1450000, 824000, 4500000, 900000, 8300000, 5800000, 360000, 5800000, 1560000, 2350000, 6950000, 510000, 2550000, 425000, 3100000, 12000000, 1550000, 365000, 4400000, 4100000, 760000, 3300000, 275000))
+colnames(early_turnout_2024) <- c("state", "early_votes", "vep", "total_ballots")
+early_turnout_2024$projected_turnout_2024 <- min(early_turnout_2024$early_votes * all_turnout_2020$multipliers, 1.0)
+early_turnout_2024 <- as.data.frame(early_turnout_2024)
+
+# keep demographics from 2020
+demographics_2020 <- demographics %>% filter(year==2020)
+
+# econ_data 2024 version
+gdp_growth_2024 <- gdp_growth %>% mutate(year=year(as.Date(DATE, format="%Y-%m-%d"))) %>% filter(year > 2022)
+cpi_2024 <- cpi %>% mutate(year=year(as.Date(DATE, format="%Y-%m-%d"))) %>% filter(year > 2022)
+rdpi_2024 <- rdpi %>% mutate(year=year(as.Date(DATE, format="%Y-%m-%d"))) %>% filter(year > 2022)
+unemployment_2024 <- unemployment %>% mutate(year=year(as.Date(DATE, format="%Y-%m-%d"))) %>% filter(year > 2022)
+
+econ_data_2024 <- cpi_2024 %>%
+              left_join(gdp_growth_2024 %>% select(-year), join_by(DATE)) %>%
+              left_join(unemployment_2024 %>% select(-year), join_by(DATE)) %>%
+              left_join(rdpi_2024 %>% select(-year), join_by(DATE))
+colnames(econ_data_2024) <- c("DATE", "cpi", "year", "gdp_growth", "unemployment_rate", "rdpi")
+econ_data_2024 <- econ_data_2024 %>% mutate(avg_cpi=mean(cpi),
+                                            avg_gdp_growth=mean(gdp_growth, na.rm=T),
+                                            avg_unemployment=mean(unemployment_rate),
+                                            avg_rdpi=mean(rdpi)) %>%
+  select(avg_cpi, avg_gdp_growth, avg_unemployment, avg_rdpi) %>% unique()
+
+# data for prediction
+# for turnout data, use 2022 for most recent counts of noncitizen, parole, probation, prison, etc. since it's not used in the training
+pred_data <- data.frame(unique(ec_data$state), unique(ec_data$stateab), rep(2024, 51), rep(NA, 51), rep(NA, 51))
+colnames(pred_data) <- c("state", "stateab", "year", "D_pv", "D_pv2p")
+pred_data <- pred_data %>% left_join(early_turnout_2024 %>% select(state, vep, total_ballots, projected_turnout_2024), join_by(state)) %>% left_join(turnout %>% select(-vep, -total_ballots) %>% filter(year==2022), join_by(state)) %>% mutate(vep_turnout=(projected_turnout_2024/vep) * 100) %>% left_join(demographics_2020, join_by(state)) %>% cbind(econ_data_2024)
+
+# get 2024 polling averages
+polls_2024 <- read.csv("state_polls_1968-2024.csv") %>% filter(year==2024, state != "District of Columbia") %>%
+  group_by(state, candidate) %>% filter(party=="DEM") %>% mutate(polling_avg_d=mean(poll_support))
+
+pred_data <- pred_data %>% left_join(polls_2024 %>% select(state, polling_avg_d), join_by(state))
+pred_data$amt_spent_r <- rep(NA, nrow(pred_data))
+pred_data$amt_spent_d <- rep(NA, nrow(pred_data))
+
+pred_data <- pred_data %>% select(state, stateab, year.x, D_pv, D_pv2p, vep_turnout, vep, total_ballots, noncitizen, parole, prison, probation, total_ineligible, overseas_eligible, total_pop, white, black, american_indian, asian_pacific_islander, other_race, two_or_more_races, hispanic_white, hispanic_black, hispanic_american_indian, hispanic_asian_pacific_islander, hispanic_other_race, hispanic_two_or_more_races, under_5, age_5_to_9, age_10_to_14, age_15_to_17, age_18_to_19, age_20, age_21, age_22_to_24, age_25_to_29, age_30_to_34, age_35_to_44, age_45_to_54, age_55_to_59, age_60_to_61, age_62_to_64, age_65_to_74, age_75_to_84, age_85_and_over, less_than_college, bachelors, graduate, under18, avg_cpi, avg_gdp_growth, avg_unemployment, avg_rdpi, polling_avg_d, amt_spent_d, amt_spent_r) %>% rename(year = year.x)
+
+pred_data <- subset(pred_data, state!="District Of Columbia")
+```
+
+Below are my predictions for the two-party democratic vote share in each state in table format and then in a bar graph format. The error bars are based on calculation of the prediction from *coefficients* that were within a 95% Confidence Interval of the true coefficients.
+
+```{r, warning=F, echo=F}
+# amt_spent is only used for prediction in Texas and Indiana. Since the full data is hard to come by, I fill in NA for now and predict the other states. I found estimates for the amt_spent on advertising by democrats in Texas and Indiana and then filled in an predicted
+# source: WXVU (Texas)
+# Indiana Source: Axios (only counts Indianapolis)
+pred_data <- pred_data %>% mutate(amt_spent_d=case_when(state=="Texas" ~ 154000000,
+                                                        state=="Indiana" ~ 339100,
+                                                        .default=NA))
+
+# perform all predictions
+D_pv2p_preds <- c()
+lower_bounds <- c()
+upper_bounds <- c()
+  
+for (i in 1:50) {
+  state_pred_data <- subset(pred_data, state==unique(pred_data$state)[i])[state_predictors[[i]]]
+  intercept <- model_summaries[[i]][1]$coefficients[1]
+  coefs <- c(model_summaries[[i]][1]$coefficients[2], model_summaries[[i]][1]$coefficients[3], model_summaries[[i]][1]$coefficients[4], model_summaries[[i]][1]$coefficients[5], model_summaries[[i]][1]$coefficients[6])
+  for (j in 1:5) {
+    if (is.na(coefs[j])) {
+      coefs[j] <- 0
+    } 
+    if (is.na(state_pred_data[1,][j])) {
+      state_pred_data[1,][j] <- 0
+    }
+  }
+  D_pv2p_preds[i] <- intercept + sum(coefs * state_pred_data[1,])
+  
+  # errors 
+  lower_bound_intercept <- confint(model_summaries[[i]])[1]
+  lower_bound_coefs <- confint(model_summaries[[i]])[,1][2:6]
+  upper_bound_intercept <- confint(model_summaries[[i]])[7]
+  upper_bound_coefs <- confint(model_summaries[[i]])[,2][2:6]
+  for (j in 1:5) {
+    if (is.na(upper_bound_coefs[j])) {
+      upper_bound_coefs[j] <- 0
+    } 
+    if (is.na(lower_bound_coefs[j])) {
+      lower_bound_coefs[j] <- 0
+    } 
+  }
+  lower_bounds[i] <- lower_bound_intercept + sum(lower_bound_coefs * state_pred_data[1,])
+  upper_bounds[i] <- upper_bound_intercept + sum(upper_bound_coefs * state_pred_data[1,])
+}
+
+results_table <- data.frame(unique(pred_data$state), D_pv2p_preds)
+colnames(results_table) <- c("state", "D_pv2p")
+
+print(results_table)
+```
+
+
+```{r, fig.height=10, echo=F, warning=F}
+results_table <- results_table %>% mutate(color_by=case_when(D_pv2p > 50 ~ 0,
+                                                             D_pv2p < 50 ~ 1)) %>% cbind(upper_bounds) %>% cbind(lower_bounds)
+
+ggplot(data=results_table, mapping=aes(x=D_pv2p, y=state)) +
+  geom_bar(stat="identity", aes(fill=as.factor(color_by)), show.legend = F) +
+  scale_fill_manual(values=c("firebrick", "dodgerblue3")) + 
+  geom_errorbar(aes(xmin=lower_bounds, xmax=upper_bounds)) +
+  xlim(0,100.5)
+```
+
+As was the case with some of the predictions, some of the errors are particularly large, I'm looking at that of Arizona, Connecticut, and North Carolina in particular. Where there is only an upper cound for the error, it means that the lower bound suggested a negative vote share, which is uninterpretable in this context.
+
+<h2>Model Reflections</h2>
+There are a few odd-balls in the prediction set. For example, it suggests that Democrats could win 100% of the vote in Maryland (unrealistic), 83% of the vote in Wisconsin, 79% of the vote in Texas, 29% of the vote in Colorado, and 26% of the vote in New Jersey. This means that, for these states, this method of prediction or number of predictors is not the most well-suited. It is the price we pay for trying to fit one, standard model 50 diverse states with different populations, preferences, and trends.  
+Another reason for the odd predictions could be that this model incorporates temporal data, going back to 1972. The political landscape in 1972 was vastly different than today's, so using a metric of candidate success in a state in 1972, may not correspond to their success in 2024. The same is true even for more recent elections: the features that may have correlated with success, or share of the vote in a state, in 200 or 2008 may not correlate with the share of the vote today.  
+With extra time and ever-accessible data, I would look into building individualized models for the states that appear problematic in this forecast. However, this was an attempt at abstraction--defining one general model with a set of rules that could be applied to all states--while still accounting for some of the individual nuances between states. I'm interested to see how this model performs for the states that, at first glance, it seems to predict reasonably (i.e. Georgia, New Hampshire, Arizona, Florida).
 

@@ -109,8 +109,8 @@ summary(whole_pca)
 #pca_results <- ec_results_scaled %>%
 #                group_by(state, year) %>%
 #                nest() %>%
-#                mutate(correlation = purrr::map(ec_results_scaled, ~ correlate(.x %>% #select(-Group))),
-#                       pca = purrr::map(ec_results_scaled, ~ princomp(.x %>% #select(-Group), cor = TRUE)))
+#                select(-stateab) %>%
+#                princomp()
 
 ```
 
@@ -132,3 +132,8 @@ ggplot(data=subset(approval, answer=="Approve"), mapping=aes(x=date, y=pct_estim
 ```
 
 Unsurprisingly, the approval ratings for Joe Biden and Kamala Harris varied together. This makes sense because they make up the leadership of the same administration (or at least they are the most visible figures). However, we see the approval rating for Kamala Harris spike towards the end of the 4-year term... around when she began her presidential campaign. This is interesting because this poll is based on her work in office, not her campaign. So it suggests that, by running for the presidency, she developed a more favorable impression about her work in the Biden Administration, among everyday Americans. This could be the result of her having a greater platform to talk about the work, her gaining more visibility, or Americans becoming optimistic about her chance at the presidency.
+
+```{r}
+
+```
+
