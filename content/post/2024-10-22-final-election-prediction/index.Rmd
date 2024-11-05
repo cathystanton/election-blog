@@ -151,6 +151,7 @@ state_data[[colnames(state_data)[state_predictors[[state_idx]][4]]]] + state_dat
 Below is a table showing which predictors had the highest $R^2$ values for each state. In this model, I chose to use the 5 highest $R^2$ values, but there is room to fine-tune the model here. I could (1) vary the number of predictors used from each state, based on a threshold for the $R^2$ value of the predictor, or based on a parameter (like the amount of variance explained before I stop incorporating new predictors). This might help make the features in each of my state-level models more uniform in terms of the variance they explain. Or I could (2) experiment changing the number of predictors used in all the states, but keep it the same between them and settle on a number of $R^2$ predictors that provides predictions I'm happy with for *most* states.
 
 ```{r, echo=F}
+library(rmarkdown)
 predictors_used <- data.frame(unique(big_data$state))
 colnames(predictors_used) <- "state"
 
@@ -162,7 +163,7 @@ for (i in 1:50) {
   predictors_used$Predictor_5[i] <- colnames(big_data)[state_predictors[[i]][5]]
 }
 
-print(predictors_used)
+paged_table(predictors_used)
 ```
 
 Next, I gathered data about the 2024 Election Cycle, akin to what I had from previous cycles, and predicted the Democratic 2-Party Vote share. for the Voting Eligible Population and Number of Ballots cast, I used the forecasts by [Michael McDonald](https://michaelmcdonald.substack.com/p/2024-turnout-forecast?r=chfet&utm_campaign=post&utm_medium=web&triedRedirect=true) since data about this doesn't exist yet from 2024. I did however make my own forecast for voter turnout in each state based on early voting rates in 2024. I took early voting rates from November 2, 2020 and November 2, 2024 from the [University of Florida's Election Lab](https://election.lab.ufl.edu/early-vote/2024-early-voting/). Then I created a multiplier to project total votes from early votes, by dividing the total votes cast in each state in 2020 by the number of early votes cast in the state in 2020.  
@@ -273,7 +274,7 @@ for (i in 1:50) {
 results_table <- data.frame(unique(pred_data$state), D_pv2p_preds)
 colnames(results_table) <- c("state", "D_pv2p")
 
-print(results_table)
+paged_table(results_table)
 ```
 
 

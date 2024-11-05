@@ -28,6 +28,10 @@
 </div>
 
 <main>
+<link href="/election-blog/post/2024/11/04/final-election-prediction/index_files/pagedtable/css/pagedtable.css" rel="stylesheet" />
+<script src="/election-blog/post/2024/11/04/final-election-prediction/index_files/pagedtable/js/pagedtable.js"></script>
+<link href="/election-blog/post/2024/11/04/final-election-prediction/index_files/pagedtable/css/pagedtable.css" rel="stylesheet" />
+<script src="/election-blog/post/2024/11/04/final-election-prediction/index_files/pagedtable/js/pagedtable.js"></script>
 <h2>Final Predictive Model for the 2024 Election</h2>
 For my final election prediction, I performed OLS regressions for each state, based on the predictors that best explained each state's variance. I compiled a dataset with variables about candidate performance since 1972, as well as demographic data, economic data, historical turnout trends, ad spending, and polling, in each state. Then I fit an OLS model to each state, on all of the features, and chose the 5 with the highest `\(R^2\)` values. The `\(R^2\)` statistic measures how much variation in an outcome (like democratic vote share) can be explained by the given predictor. So by choosing to build a linear model based on predictors with high `\(R^2\)` values in each state, I hope to use the least possible predictors to capture the most possible nuance in each state.  
 Then I fit another model on each state, using just the selected predictors based on `\(R^2\)`. To make the final predictons, I compiled a dataset of the same predictors, but from 2024, and predicted each state's 2-Party Democratic Vote Share from a multilinear regression for each state. It's important to note that, using this method, each state winds up having a different set of predictors used in its model.  
@@ -35,215 +39,19 @@ The reasons for using a state-by-state model and different predictors per state 
 <h2>The Data</h2>
 For this model, I made a dataset with over 50 predictors. It goes back to the election of 1972 and includes metrics about candidate polling averages; national CPI, GDP Growth, Unemployment Rate, and RDPI; education level, age distribution, and race by state; ads spending by state; previous turnout; and previous candidate performance. In cases where I had missing values, I decided to impute the column mean. 
 <p>Below is a table showing which predictors had the highest <code>\(R^2\)</code> values for each state. In this model, I chose to use the 5 highest <code>\(R^2\)</code> values, but there is room to fine-tune the model here. I could (1) vary the number of predictors used from each state, based on a threshold for the <code>\(R^2\)</code> value of the predictor, or based on a parameter (like the amount of variance explained before I stop incorporating new predictors). This might help make the features in each of my state-level models more uniform in terms of the variance they explain. Or I could (2) experiment changing the number of predictors used in all the states, but keep it the same between them and settle on a number of <code>\(R^2\)</code> predictors that provides predictions I&rsquo;m happy with for <em>most</em> states.</p>
-<pre><code>##             state                     Predictor_1
-## 1         Alabama                    age_55_to_59
-## 2          Alaska                    age_15_to_17
-## 3         Arizona                    age_15_to_17
-## 4        Arkansas                    age_55_to_59
-## 5      California          asian_pacific_islander
-## 6        Colorado                   polling_avg_d
-## 7     Connecticut                    age_75_to_84
-## 8        Delaware                   polling_avg_d
-## 9         Florida                total_ineligible
-## 10        Georgia               two_or_more_races
-## 11         Hawaii                      noncitizen
-## 12          Idaho                   polling_avg_d
-## 13       Illinois                    age_18_to_19
-## 14        Indiana               overseas_eligible
-## 15           Iowa                    age_75_to_84
-## 16         Kansas                   polling_avg_d
-## 17       Kentucky                    age_30_to_34
-## 18      Louisiana                          parole
-## 19          Maine                    age_45_to_54
-## 20       Maryland                       bachelors
-## 21  Massachusetts                    age_18_to_19
-## 22       Michigan                          prison
-## 23      Minnesota                    age_35_to_44
-## 24    Mississippi      hispanic_two_or_more_races
-## 25       Missouri                    age_35_to_44
-## 26        Montana                         under_5
-## 27       Nebraska                   polling_avg_d
-## 28         Nevada                          prison
-## 29  New Hampshire                    age_18_to_19
-## 30     New Jersey                   polling_avg_d
-## 31     New Mexico                    age_15_to_17
-## 32       New York                          parole
-## 33 North Carolina                      age_5_to_9
-## 34   North Dakota                    age_75_to_84
-## 35           Ohio                          prison
-## 36       Oklahoma                      noncitizen
-## 37         Oregon                    age_22_to_24
-## 38   Pennsylvania                    age_35_to_44
-## 39   Rhode Island                    age_75_to_84
-## 40 South Carolina hispanic_asian_pacific_islander
-## 41   South Dakota                      age_5_to_9
-## 42      Tennessee                    age_55_to_59
-## 43          Texas                     amt_spent_r
-## 44           Utah               two_or_more_races
-## 45        Vermont                  hispanic_white
-## 46       Virginia                total_ineligible
-## 47     Washington                    age_18_to_19
-## 48  West Virginia             hispanic_other_race
-## 49      Wisconsin               overseas_eligible
-## 50        Wyoming                      noncitizen
-##                        Predictor_2                     Predictor_3
-## 1                     age_60_to_61             hispanic_other_race
-## 2       hispanic_two_or_more_races               less_than_college
-## 3                     age_18_to_19                    age_75_to_84
-## 4                           parole               less_than_college
-## 5                        total_pop                         avg_cpi
-## 6                     age_18_to_19                    age_15_to_17
-## 7                           age_20                    age_22_to_24
-## 8                     age_25_to_29                    age_45_to_54
-## 9                     age_22_to_24                      noncitizen
-## 10      hispanic_two_or_more_races                    age_45_to_54
-## 11                   polling_avg_d                         avg_cpi
-## 12                    age_30_to_34                avg_unemployment
-## 13                    age_15_to_17                          age_21
-## 14                   polling_avg_d                  avg_gdp_growth
-## 15                    age_35_to_44                    age_22_to_24
-## 16                  avg_gdp_growth                    age_15_to_17
-## 17               less_than_college                total_ineligible
-## 18                       probation                total_ineligible
-## 19                    age_25_to_29                 american_indian
-## 20                         avg_cpi                       total_pop
-## 21                          age_20                          age_21
-## 22                           black                 american_indian
-## 23                    age_15_to_17                 american_indian
-## 24                       probation                total_ineligible
-## 25                    age_60_to_61                    age_55_to_59
-## 26                    age_30_to_34                          prison
-## 27                          age_21                          age_20
-## 28                      noncitizen                 american_indian
-## 29                          prison                total_ineligible
-## 30                      noncitizen                          age_20
-## 31 hispanic_asian_pacific_islander                  avg_gdp_growth
-## 32                      noncitizen                    age_75_to_84
-## 33                         under18                 american_indian
-## 34                       total_pop                    age_65_to_74
-## 35                total_ineligible                    age_35_to_44
-## 36                  hispanic_white                  hispanic_black
-## 37                          age_20                          age_21
-## 38                    age_75_to_84 hispanic_asian_pacific_islander
-## 39                    age_22_to_24                          prison
-## 40                          parole                avg_unemployment
-## 41                           white                       total_pop
-## 42                    age_60_to_61             hispanic_other_race
-## 43                     amt_spent_d hispanic_asian_pacific_islander
-## 44                    age_25_to_29      hispanic_two_or_more_races
-## 45                    age_60_to_61                    age_55_to_59
-## 46                         avg_cpi                       probation
-## 47                          age_20                          age_21
-## 48                  hispanic_black        hispanic_american_indian
-## 49                   polling_avg_d                  avg_gdp_growth
-## 50                 age_85_and_over                        avg_rdpi
-##                 Predictor_4            Predictor_5
-## 1                other_race           age_62_to_64
-## 2              age_18_to_19       avg_unemployment
-## 3                    age_21                 age_20
-## 4              age_60_to_61    hispanic_other_race
-## 5                 bachelors                 age_20
-## 6              age_75_to_84                 age_21
-## 7                    age_21           age_18_to_19
-## 8                     black           age_22_to_24
-## 9                    age_21                 prison
-## 10         avg_unemployment          polling_avg_d
-## 11                total_pop           age_10_to_14
-## 12              vep_turnout             age_5_to_9
-## 13             age_22_to_24                 age_20
-## 14              amt_spent_d         hispanic_white
-## 15                   age_20                 age_21
-## 16             age_10_to_14                under18
-## 17                 graduate           age_55_to_59
-## 18             age_55_to_59             age_5_to_9
-## 19            polling_avg_d           age_30_to_34
-## 20   asian_pacific_islander      less_than_college
-## 21             age_22_to_24           age_15_to_17
-## 22             age_22_to_24                 age_21
-## 23             age_30_to_34           age_10_to_14
-## 24        two_or_more_races               avg_rdpi
-## 25             age_62_to_64           age_65_to_74
-## 26         total_ineligible           age_25_to_29
-## 27             age_15_to_17      overseas_eligible
-## 28             age_25_to_29                 age_21
-## 29                   age_20        american_indian
-## 30             age_22_to_24           age_18_to_19
-## 31             age_10_to_14         hispanic_black
-## 32             age_22_to_24           age_18_to_19
-## 33             age_10_to_14                under_5
-## 34            total_ballots             other_race
-## 35             age_22_to_24                 age_21
-## 36        less_than_college           age_55_to_59
-## 37             age_18_to_19           age_15_to_17
-## 38 hispanic_american_indian              probation
-## 39                   age_20                 age_21
-## 40         total_ineligible           age_15_to_17
-## 41   asian_pacific_islander               avg_rdpi
-## 42        less_than_college           age_62_to_64
-## 43        two_or_more_races          polling_avg_d
-## 44            polling_avg_d           age_65_to_74
-## 45           hispanic_black           age_62_to_64
-## 46                      vep asian_pacific_islander
-## 47             age_22_to_24              bachelors
-## 48         total_ineligible               graduate
-## 49             age_65_to_74                 age_21
-## 50                 graduate              bachelors
-</code></pre>
+<div data-pagedtable="false">
+  <script data-pagedtable-source type="application/json">
+{"columns":[{"label":["state"],"name":[1],"type":["chr"],"align":["left"]},{"label":["Predictor_1"],"name":[2],"type":["chr"],"align":["left"]},{"label":["Predictor_2"],"name":[3],"type":["chr"],"align":["left"]},{"label":["Predictor_3"],"name":[4],"type":["chr"],"align":["left"]},{"label":["Predictor_4"],"name":[5],"type":["chr"],"align":["left"]},{"label":["Predictor_5"],"name":[6],"type":["chr"],"align":["left"]}],"data":[{"1":"Alabama","2":"age_55_to_59","3":"age_60_to_61","4":"hispanic_other_race","5":"other_race","6":"age_62_to_64"},{"1":"Alaska","2":"age_15_to_17","3":"hispanic_two_or_more_races","4":"less_than_college","5":"age_18_to_19","6":"avg_unemployment"},{"1":"Arizona","2":"age_15_to_17","3":"age_18_to_19","4":"age_75_to_84","5":"age_21","6":"age_20"},{"1":"Arkansas","2":"age_55_to_59","3":"parole","4":"less_than_college","5":"age_60_to_61","6":"hispanic_other_race"},{"1":"California","2":"asian_pacific_islander","3":"total_pop","4":"avg_cpi","5":"bachelors","6":"age_20"},{"1":"Colorado","2":"polling_avg_d","3":"age_18_to_19","4":"age_15_to_17","5":"age_75_to_84","6":"age_21"},{"1":"Connecticut","2":"age_75_to_84","3":"age_20","4":"age_22_to_24","5":"age_21","6":"age_18_to_19"},{"1":"Delaware","2":"polling_avg_d","3":"age_25_to_29","4":"age_45_to_54","5":"black","6":"age_22_to_24"},{"1":"Florida","2":"total_ineligible","3":"age_22_to_24","4":"noncitizen","5":"age_21","6":"prison"},{"1":"Georgia","2":"two_or_more_races","3":"hispanic_two_or_more_races","4":"age_45_to_54","5":"avg_unemployment","6":"polling_avg_d"},{"1":"Hawaii","2":"noncitizen","3":"polling_avg_d","4":"avg_cpi","5":"total_pop","6":"age_10_to_14"},{"1":"Idaho","2":"polling_avg_d","3":"age_30_to_34","4":"avg_unemployment","5":"vep_turnout","6":"age_5_to_9"},{"1":"Illinois","2":"age_18_to_19","3":"age_15_to_17","4":"age_21","5":"age_22_to_24","6":"age_20"},{"1":"Indiana","2":"overseas_eligible","3":"polling_avg_d","4":"avg_gdp_growth","5":"amt_spent_d","6":"hispanic_white"},{"1":"Iowa","2":"age_75_to_84","3":"age_35_to_44","4":"age_22_to_24","5":"age_20","6":"age_21"},{"1":"Kansas","2":"polling_avg_d","3":"avg_gdp_growth","4":"age_15_to_17","5":"age_10_to_14","6":"under18"},{"1":"Kentucky","2":"age_30_to_34","3":"less_than_college","4":"total_ineligible","5":"graduate","6":"age_55_to_59"},{"1":"Louisiana","2":"parole","3":"probation","4":"total_ineligible","5":"age_55_to_59","6":"age_5_to_9"},{"1":"Maine","2":"age_45_to_54","3":"age_25_to_29","4":"american_indian","5":"polling_avg_d","6":"age_30_to_34"},{"1":"Maryland","2":"bachelors","3":"avg_cpi","4":"total_pop","5":"asian_pacific_islander","6":"less_than_college"},{"1":"Massachusetts","2":"age_18_to_19","3":"age_20","4":"age_21","5":"age_22_to_24","6":"age_15_to_17"},{"1":"Michigan","2":"prison","3":"black","4":"american_indian","5":"age_22_to_24","6":"age_21"},{"1":"Minnesota","2":"age_35_to_44","3":"age_15_to_17","4":"american_indian","5":"age_30_to_34","6":"age_10_to_14"},{"1":"Mississippi","2":"hispanic_two_or_more_races","3":"probation","4":"total_ineligible","5":"two_or_more_races","6":"avg_rdpi"},{"1":"Missouri","2":"age_35_to_44","3":"age_60_to_61","4":"age_55_to_59","5":"age_62_to_64","6":"age_65_to_74"},{"1":"Montana","2":"under_5","3":"age_30_to_34","4":"prison","5":"total_ineligible","6":"age_25_to_29"},{"1":"Nebraska","2":"polling_avg_d","3":"age_21","4":"age_20","5":"age_15_to_17","6":"overseas_eligible"},{"1":"Nevada","2":"prison","3":"noncitizen","4":"american_indian","5":"age_25_to_29","6":"age_21"},{"1":"New Hampshire","2":"age_18_to_19","3":"prison","4":"total_ineligible","5":"age_20","6":"american_indian"},{"1":"New Jersey","2":"polling_avg_d","3":"noncitizen","4":"age_20","5":"age_22_to_24","6":"age_18_to_19"},{"1":"New Mexico","2":"age_15_to_17","3":"hispanic_asian_pacific_islander","4":"avg_gdp_growth","5":"age_10_to_14","6":"hispanic_black"},{"1":"New York","2":"parole","3":"noncitizen","4":"age_75_to_84","5":"age_22_to_24","6":"age_18_to_19"},{"1":"North Carolina","2":"age_5_to_9","3":"under18","4":"american_indian","5":"age_10_to_14","6":"under_5"},{"1":"North Dakota","2":"age_75_to_84","3":"total_pop","4":"age_65_to_74","5":"total_ballots","6":"other_race"},{"1":"Ohio","2":"prison","3":"total_ineligible","4":"age_35_to_44","5":"age_22_to_24","6":"age_21"},{"1":"Oklahoma","2":"noncitizen","3":"hispanic_white","4":"hispanic_black","5":"less_than_college","6":"age_55_to_59"},{"1":"Oregon","2":"age_22_to_24","3":"age_20","4":"age_21","5":"age_18_to_19","6":"age_15_to_17"},{"1":"Pennsylvania","2":"age_35_to_44","3":"age_75_to_84","4":"hispanic_asian_pacific_islander","5":"hispanic_american_indian","6":"probation"},{"1":"Rhode Island","2":"age_75_to_84","3":"age_22_to_24","4":"prison","5":"age_20","6":"age_21"},{"1":"South Carolina","2":"hispanic_asian_pacific_islander","3":"parole","4":"avg_unemployment","5":"total_ineligible","6":"age_15_to_17"},{"1":"South Dakota","2":"age_5_to_9","3":"white","4":"total_pop","5":"asian_pacific_islander","6":"avg_rdpi"},{"1":"Tennessee","2":"age_55_to_59","3":"age_60_to_61","4":"hispanic_other_race","5":"less_than_college","6":"age_62_to_64"},{"1":"Texas","2":"amt_spent_r","3":"amt_spent_d","4":"hispanic_asian_pacific_islander","5":"two_or_more_races","6":"polling_avg_d"},{"1":"Utah","2":"two_or_more_races","3":"age_25_to_29","4":"hispanic_two_or_more_races","5":"polling_avg_d","6":"age_65_to_74"},{"1":"Vermont","2":"hispanic_white","3":"age_60_to_61","4":"age_55_to_59","5":"hispanic_black","6":"age_62_to_64"},{"1":"Virginia","2":"total_ineligible","3":"avg_cpi","4":"probation","5":"vep","6":"asian_pacific_islander"},{"1":"Washington","2":"age_18_to_19","3":"age_20","4":"age_21","5":"age_22_to_24","6":"bachelors"},{"1":"West Virginia","2":"hispanic_other_race","3":"hispanic_black","4":"hispanic_american_indian","5":"total_ineligible","6":"graduate"},{"1":"Wisconsin","2":"overseas_eligible","3":"polling_avg_d","4":"avg_gdp_growth","5":"age_65_to_74","6":"age_21"},{"1":"Wyoming","2":"noncitizen","3":"age_85_and_over","4":"avg_rdpi","5":"graduate","6":"bachelors"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
 <p>Next, I gathered data about the 2024 Election Cycle, akin to what I had from previous cycles, and predicted the Democratic 2-Party Vote share. for the Voting Eligible Population and Number of Ballots cast, I used the forecasts by <a href="https://michaelmcdonald.substack.com/p/2024-turnout-forecast?r=chfet&amp;utm_campaign=post&amp;utm_medium=web&amp;triedRedirect=true">Michael McDonald</a> since data about this doesn&rsquo;t exist yet from 2024. I did however make my own forecast for voter turnout in each state based on early voting rates in 2024. I took early voting rates from November 2, 2020 and November 2, 2024 from the <a href="https://election.lab.ufl.edu/early-vote/2024-early-voting/">University of Florida&rsquo;s Election Lab</a>. Then I created a multiplier to project total votes from early votes, by dividing the total votes cast in each state in 2020 by the number of early votes cast in the state in 2020.<br>
 There is potential that the number of early ballots cast in 2020 may be higher OR lower than the number of early ballots cast in 2024. An argument for why they might be higher would be that the COVID crisis was at a peak in 2020, and any people used early/mail-in voting as an opportunity to avoid crowded polling places on election day, out fo public health concerns. A reason why the number of early ballots cast in 2020 would be lower than those in 2024 however is that, in 2024, people are more familiar with the early/mail-in voting process than they were in 2020, so they may be more inclined to use it. Similarly, on a state-by-state basis, if states changed their mail-in and early voting policies between 2020 and 2024, it may have been easier to vote early in one year than the other, leading to differing recorded numbers of people turning out early.</p>
 <p>Below are my predictions for the two-party democratic vote share in each state in table format and then in a bar graph format. The error bars are based on calculation of the prediction from <em>coefficients</em> that were within a 95% Confidence Interval of the true coefficients.</p>
-<pre><code>##             state    D_pv2p
-## 1         Alabama  36.57593
-## 2          Alaska  41.66075
-## 3         Arizona  50.30740
-## 4        Arkansas  27.85733
-## 5      California  55.85504
-## 6        Colorado  28.94831
-## 7     Connecticut  59.31469
-## 8        Delaware  18.10426
-## 9         Florida  48.20844
-## 10        Georgia  48.52574
-## 11         Hawaii  67.75294
-## 12          Idaho  27.90588
-## 13       Illinois  57.58610
-## 14        Indiana  84.53618
-## 15           Iowa  44.15674
-## 16         Kansas  15.40027
-## 17       Kentucky  38.06651
-## 18      Louisiana  46.26064
-## 19          Maine  27.68329
-## 20       Maryland 100.45258
-## 21  Massachusetts  67.12088
-## 22       Michigan  47.18306
-## 23      Minnesota  51.97121
-## 24    Mississippi  44.20070
-## 25       Missouri  40.42852
-## 26        Montana  39.63347
-## 27       Nebraska  40.70693
-## 28         Nevada  45.89546
-## 29  New Hampshire  55.78559
-## 30     New Jersey  26.63670
-## 31     New Mexico  54.37719
-## 32       New York  49.23764
-## 33 North Carolina  48.75608
-## 34   North Dakota  31.96275
-## 35           Ohio  40.31895
-## 36       Oklahoma  34.69234
-## 37         Oregon  56.07798
-## 38   Pennsylvania  49.58901
-## 39   Rhode Island  56.34801
-## 40 South Carolina  36.78099
-## 41   South Dakota  40.57670
-## 42      Tennessee  37.44910
-## 43          Texas  79.39546
-## 44           Utah  19.87823
-## 45        Vermont  64.36780
-## 46       Virginia  80.33175
-## 47     Washington  59.70750
-## 48  West Virginia  36.97645
-## 49      Wisconsin  83.58818
-## 50        Wyoming  30.20115
-</code></pre>
+<div data-pagedtable="false">
+  <script data-pagedtable-source type="application/json">
+{"columns":[{"label":["state"],"name":[1],"type":["chr"],"align":["left"]},{"label":["D_pv2p"],"name":[2],"type":["dbl"],"align":["right"]}],"data":[{"1":"Alabama","2":"36.57593"},{"1":"Alaska","2":"41.66075"},{"1":"Arizona","2":"50.30740"},{"1":"Arkansas","2":"27.85733"},{"1":"California","2":"55.85504"},{"1":"Colorado","2":"28.94831"},{"1":"Connecticut","2":"59.31469"},{"1":"Delaware","2":"18.10426"},{"1":"Florida","2":"48.20844"},{"1":"Georgia","2":"48.52574"},{"1":"Hawaii","2":"67.75294"},{"1":"Idaho","2":"27.90588"},{"1":"Illinois","2":"57.58610"},{"1":"Indiana","2":"84.53618"},{"1":"Iowa","2":"44.15674"},{"1":"Kansas","2":"15.40027"},{"1":"Kentucky","2":"38.06651"},{"1":"Louisiana","2":"46.26064"},{"1":"Maine","2":"27.68329"},{"1":"Maryland","2":"100.45258"},{"1":"Massachusetts","2":"67.12088"},{"1":"Michigan","2":"47.18306"},{"1":"Minnesota","2":"51.97121"},{"1":"Mississippi","2":"44.20070"},{"1":"Missouri","2":"40.42852"},{"1":"Montana","2":"39.63347"},{"1":"Nebraska","2":"40.70693"},{"1":"Nevada","2":"45.89546"},{"1":"New Hampshire","2":"55.78559"},{"1":"New Jersey","2":"26.63670"},{"1":"New Mexico","2":"54.37719"},{"1":"New York","2":"49.23764"},{"1":"North Carolina","2":"48.75608"},{"1":"North Dakota","2":"31.96275"},{"1":"Ohio","2":"40.31895"},{"1":"Oklahoma","2":"34.69234"},{"1":"Oregon","2":"56.07798"},{"1":"Pennsylvania","2":"49.58901"},{"1":"Rhode Island","2":"56.34801"},{"1":"South Carolina","2":"36.78099"},{"1":"South Dakota","2":"40.57670"},{"1":"Tennessee","2":"37.44910"},{"1":"Texas","2":"79.39546"},{"1":"Utah","2":"19.87823"},{"1":"Vermont","2":"64.36780"},{"1":"Virginia","2":"80.33175"},{"1":"Washington","2":"59.70750"},{"1":"West Virginia","2":"36.97645"},{"1":"Wisconsin","2":"83.58818"},{"1":"Wyoming","2":"30.20115"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
 <img src="/election-blog/post/2024/11/04/final-election-prediction/index_files/figure-html/unnamed-chunk-7-1.png" width="672" />
 <p>As was the case with some of the predictions, some of the errors are particularly large, I&rsquo;m looking at that of Arizona, Connecticut, and North Carolina in particular. Where there is only an upper cound for the error, it means that the lower bound suggested a negative vote share, which is uninterpretable in this context.</p>
 <h2>Model Reflections</h2>
