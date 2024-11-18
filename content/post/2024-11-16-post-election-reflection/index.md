@@ -5,13 +5,15 @@ date: "2024-11-16"
 slug: "post-election-reflection"
 categories: []
 tags: []
+output:
+  extra_dependencies: ['amsmath', 'someotherpackage']
 ---
 
 <h2>
 Recap of my 2024 Presidential Election Forecast Model
 </h2>
 
-This semester, I explored a variety of indicators and datasets week-to-week to predict the outcome of the 2024 U.S. Presidential Election. Most posts on this blog used one *type* of data (e.g. economic, polling, demographic, advertising) to predict the election outcome. For my final model, I chose to amalgamate data from across these sets into one big dataset, and then run a regression on each state, to see which predictors were most effective in explaining variance in Democratic Vote Share over time, based on their value for `\(R^2\)`. Then in each state, I fit a new multilinear regression just using the top 5 most predictive variables and predicted Democratic Vote Share based on that. For some variables, data comes from as far back as 1972. In creating a 2024 dataset to predict on, I had to use some *projected* metrics, which may have influenced my model’s accuracy (for example, I had to use projected demographic data since the last Census was conducted in 2020, and I had to use *projected turnout*, from the political scientist Michael McDonald’s prediction, because there did not exist *actual* turnout data for 2024 when I was making my prediction). My model did not make a prediction for Washington D.C. due to a lack of data, nor did it predict the national popular vote share, but it did generate percentages of the Democratic Vote Share in every state.
+This semester, I explored a variety of indicators and datasets week-to-week to predict the outcome of the 2024 U.S. Presidential Election. Most posts on this blog used one *type* of data (e.g. economic, polling, demographic, advertising) to predict the election outcome. For my final model, I chose to amalgamate data from across these sets into one big dataset, and then run a regression on each state, to see which predictors were most effective in explaining variance in Democratic Vote Share over time, based on their value for R<sup>2</sup>. Then in each state, I fit a new multilinear regression just using the top 5 most predictive variables and predicted Democratic Vote Share based on that. For some variables, data comes from as far back as 1972. In creating a 2024 dataset to predict on, I had to use some *projected* metrics, which may have influenced my model’s accuracy (for example, I had to use projected demographic data since the last Census was conducted in 2020, and I had to use *projected turnout*, from the political scientist Michael McDonald’s prediction, because there did not exist *actual* turnout data for 2024 when I was making my prediction). My model did not make a prediction for Washington D.C. due to a lack of data, nor did it predict the national popular vote share, but it did generate percentages of the Democratic Vote Share in every state.
 
 <h2>
 Results and Accuracy of the Model
@@ -19,20 +21,20 @@ Results and Accuracy of the Model
 
 The table below shows each state’s projected Democratic Vote Share (DVS) next to its actual, observed Democratic Vote Share in the 2024 Election. Cells with a DVS below 50% are shaded *red* because a Republican would have won them and cells with a DVS above 50% are shaded *blue.*
 
-<div id="pdrsguddwh" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
-<style>#pdrsguddwh table {
+<div id="oixwtgyfdj" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
+<style>#oixwtgyfdj table {
   font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-&#10;#pdrsguddwh thead, #pdrsguddwh tbody, #pdrsguddwh tfoot, #pdrsguddwh tr, #pdrsguddwh td, #pdrsguddwh th {
+&#10;#oixwtgyfdj thead, #oixwtgyfdj tbody, #oixwtgyfdj tfoot, #oixwtgyfdj tr, #oixwtgyfdj td, #oixwtgyfdj th {
   border-style: none;
 }
-&#10;#pdrsguddwh p {
+&#10;#oixwtgyfdj p {
   margin: 0;
   padding: 0;
 }
-&#10;#pdrsguddwh .gt_table {
+&#10;#oixwtgyfdj .gt_table {
   display: table;
   border-collapse: collapse;
   line-height: normal;
@@ -57,11 +59,11 @@ The table below shows each state’s projected Democratic Vote Share (DVS) next 
   border-left-width: 2px;
   border-left-color: #D3D3D3;
 }
-&#10;#pdrsguddwh .gt_caption {
+&#10;#oixwtgyfdj .gt_caption {
   padding-top: 4px;
   padding-bottom: 4px;
 }
-&#10;#pdrsguddwh .gt_title {
+&#10;#oixwtgyfdj .gt_title {
   color: #333333;
   font-size: 125%;
   font-weight: initial;
@@ -72,7 +74,7 @@ The table below shows each state’s projected Democratic Vote Share (DVS) next 
   border-bottom-color: #FFFFFF;
   border-bottom-width: 0;
 }
-&#10;#pdrsguddwh .gt_subtitle {
+&#10;#oixwtgyfdj .gt_subtitle {
   color: #333333;
   font-size: 85%;
   font-weight: initial;
@@ -83,7 +85,7 @@ The table below shows each state’s projected Democratic Vote Share (DVS) next 
   border-top-color: #FFFFFF;
   border-top-width: 0;
 }
-&#10;#pdrsguddwh .gt_heading {
+&#10;#oixwtgyfdj .gt_heading {
   background-color: #FFFFFF;
   text-align: center;
   border-bottom-color: #FFFFFF;
@@ -94,12 +96,12 @@ The table below shows each state’s projected Democratic Vote Share (DVS) next 
   border-right-width: 1px;
   border-right-color: #D3D3D3;
 }
-&#10;#pdrsguddwh .gt_bottom_border {
+&#10;#oixwtgyfdj .gt_bottom_border {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
-&#10;#pdrsguddwh .gt_col_headings {
+&#10;#oixwtgyfdj .gt_col_headings {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -113,7 +115,7 @@ The table below shows each state’s projected Democratic Vote Share (DVS) next 
   border-right-width: 1px;
   border-right-color: #D3D3D3;
 }
-&#10;#pdrsguddwh .gt_col_heading {
+&#10;#oixwtgyfdj .gt_col_heading {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -132,7 +134,7 @@ The table below shows each state’s projected Democratic Vote Share (DVS) next 
   padding-right: 5px;
   overflow-x: hidden;
 }
-&#10;#pdrsguddwh .gt_column_spanner_outer {
+&#10;#oixwtgyfdj .gt_column_spanner_outer {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -143,13 +145,13 @@ The table below shows each state’s projected Democratic Vote Share (DVS) next 
   padding-left: 4px;
   padding-right: 4px;
 }
-&#10;#pdrsguddwh .gt_column_spanner_outer:first-child {
+&#10;#oixwtgyfdj .gt_column_spanner_outer:first-child {
   padding-left: 0;
 }
-&#10;#pdrsguddwh .gt_column_spanner_outer:last-child {
+&#10;#oixwtgyfdj .gt_column_spanner_outer:last-child {
   padding-right: 0;
 }
-&#10;#pdrsguddwh .gt_column_spanner {
+&#10;#oixwtgyfdj .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
@@ -160,10 +162,10 @@ The table below shows each state’s projected Democratic Vote Share (DVS) next 
   display: inline-block;
   width: 100%;
 }
-&#10;#pdrsguddwh .gt_spanner_row {
+&#10;#oixwtgyfdj .gt_spanner_row {
   border-bottom-style: hidden;
 }
-&#10;#pdrsguddwh .gt_group_heading {
+&#10;#oixwtgyfdj .gt_group_heading {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -188,7 +190,7 @@ The table below shows each state’s projected Democratic Vote Share (DVS) next 
   vertical-align: middle;
   text-align: left;
 }
-&#10;#pdrsguddwh .gt_empty_group_heading {
+&#10;#oixwtgyfdj .gt_empty_group_heading {
   padding: 0.5px;
   color: #333333;
   background-color: #FFFFFF;
@@ -202,13 +204,13 @@ The table below shows each state’s projected Democratic Vote Share (DVS) next 
   border-bottom-color: #D3D3D3;
   vertical-align: middle;
 }
-&#10;#pdrsguddwh .gt_from_md > :first-child {
+&#10;#oixwtgyfdj .gt_from_md > :first-child {
   margin-top: 0;
 }
-&#10;#pdrsguddwh .gt_from_md > :last-child {
+&#10;#oixwtgyfdj .gt_from_md > :last-child {
   margin-bottom: 0;
 }
-&#10;#pdrsguddwh .gt_row {
+&#10;#oixwtgyfdj .gt_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -226,7 +228,7 @@ The table below shows each state’s projected Democratic Vote Share (DVS) next 
   vertical-align: middle;
   overflow-x: hidden;
 }
-&#10;#pdrsguddwh .gt_stub {
+&#10;#oixwtgyfdj .gt_stub {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -238,7 +240,7 @@ The table below shows each state’s projected Democratic Vote Share (DVS) next 
   padding-left: 5px;
   padding-right: 5px;
 }
-&#10;#pdrsguddwh .gt_stub_row_group {
+&#10;#oixwtgyfdj .gt_stub_row_group {
   color: #333333;
   background-color: #FFFFFF;
   font-size: 100%;
@@ -251,13 +253,13 @@ The table below shows each state’s projected Democratic Vote Share (DVS) next 
   padding-right: 5px;
   vertical-align: top;
 }
-&#10;#pdrsguddwh .gt_row_group_first td {
+&#10;#oixwtgyfdj .gt_row_group_first td {
   border-top-width: 2px;
 }
-&#10;#pdrsguddwh .gt_row_group_first th {
+&#10;#oixwtgyfdj .gt_row_group_first th {
   border-top-width: 2px;
 }
-&#10;#pdrsguddwh .gt_summary_row {
+&#10;#oixwtgyfdj .gt_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -266,14 +268,14 @@ The table below shows each state’s projected Democratic Vote Share (DVS) next 
   padding-left: 5px;
   padding-right: 5px;
 }
-&#10;#pdrsguddwh .gt_first_summary_row {
+&#10;#oixwtgyfdj .gt_first_summary_row {
   border-top-style: solid;
   border-top-color: #D3D3D3;
 }
-&#10;#pdrsguddwh .gt_first_summary_row.thick {
+&#10;#oixwtgyfdj .gt_first_summary_row.thick {
   border-top-width: 2px;
 }
-&#10;#pdrsguddwh .gt_last_summary_row {
+&#10;#oixwtgyfdj .gt_last_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -282,7 +284,7 @@ The table below shows each state’s projected Democratic Vote Share (DVS) next 
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
-&#10;#pdrsguddwh .gt_grand_summary_row {
+&#10;#oixwtgyfdj .gt_grand_summary_row {
   color: #333333;
   background-color: #FFFFFF;
   text-transform: inherit;
@@ -291,7 +293,7 @@ The table below shows each state’s projected Democratic Vote Share (DVS) next 
   padding-left: 5px;
   padding-right: 5px;
 }
-&#10;#pdrsguddwh .gt_first_grand_summary_row {
+&#10;#oixwtgyfdj .gt_first_grand_summary_row {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -300,7 +302,7 @@ The table below shows each state’s projected Democratic Vote Share (DVS) next 
   border-top-width: 6px;
   border-top-color: #D3D3D3;
 }
-&#10;#pdrsguddwh .gt_last_grand_summary_row_top {
+&#10;#oixwtgyfdj .gt_last_grand_summary_row_top {
   padding-top: 8px;
   padding-bottom: 8px;
   padding-left: 5px;
@@ -309,10 +311,10 @@ The table below shows each state’s projected Democratic Vote Share (DVS) next 
   border-bottom-width: 6px;
   border-bottom-color: #D3D3D3;
 }
-&#10;#pdrsguddwh .gt_striped {
+&#10;#oixwtgyfdj .gt_striped {
   background-color: rgba(128, 128, 128, 0.05);
 }
-&#10;#pdrsguddwh .gt_table_body {
+&#10;#oixwtgyfdj .gt_table_body {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #D3D3D3;
@@ -320,7 +322,7 @@ The table below shows each state’s projected Democratic Vote Share (DVS) next 
   border-bottom-width: 2px;
   border-bottom-color: #D3D3D3;
 }
-&#10;#pdrsguddwh .gt_footnotes {
+&#10;#oixwtgyfdj .gt_footnotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -333,7 +335,7 @@ The table below shows each state’s projected Democratic Vote Share (DVS) next 
   border-right-width: 2px;
   border-right-color: #D3D3D3;
 }
-&#10;#pdrsguddwh .gt_footnote {
+&#10;#oixwtgyfdj .gt_footnote {
   margin: 0px;
   font-size: 90%;
   padding-top: 4px;
@@ -341,7 +343,7 @@ The table below shows each state’s projected Democratic Vote Share (DVS) next 
   padding-left: 5px;
   padding-right: 5px;
 }
-&#10;#pdrsguddwh .gt_sourcenotes {
+&#10;#oixwtgyfdj .gt_sourcenotes {
   color: #333333;
   background-color: #FFFFFF;
   border-bottom-style: none;
@@ -354,64 +356,64 @@ The table below shows each state’s projected Democratic Vote Share (DVS) next 
   border-right-width: 2px;
   border-right-color: #D3D3D3;
 }
-&#10;#pdrsguddwh .gt_sourcenote {
+&#10;#oixwtgyfdj .gt_sourcenote {
   font-size: 90%;
   padding-top: 4px;
   padding-bottom: 4px;
   padding-left: 5px;
   padding-right: 5px;
 }
-&#10;#pdrsguddwh .gt_left {
+&#10;#oixwtgyfdj .gt_left {
   text-align: left;
 }
-&#10;#pdrsguddwh .gt_center {
+&#10;#oixwtgyfdj .gt_center {
   text-align: center;
 }
-&#10;#pdrsguddwh .gt_right {
+&#10;#oixwtgyfdj .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
-&#10;#pdrsguddwh .gt_font_normal {
+&#10;#oixwtgyfdj .gt_font_normal {
   font-weight: normal;
 }
-&#10;#pdrsguddwh .gt_font_bold {
+&#10;#oixwtgyfdj .gt_font_bold {
   font-weight: bold;
 }
-&#10;#pdrsguddwh .gt_font_italic {
+&#10;#oixwtgyfdj .gt_font_italic {
   font-style: italic;
 }
-&#10;#pdrsguddwh .gt_super {
+&#10;#oixwtgyfdj .gt_super {
   font-size: 65%;
 }
-&#10;#pdrsguddwh .gt_footnote_marks {
+&#10;#oixwtgyfdj .gt_footnote_marks {
   font-size: 75%;
   vertical-align: 0.4em;
   position: initial;
 }
-&#10;#pdrsguddwh .gt_asterisk {
+&#10;#oixwtgyfdj .gt_asterisk {
   font-size: 100%;
   vertical-align: 0;
 }
-&#10;#pdrsguddwh .gt_indent_1 {
+&#10;#oixwtgyfdj .gt_indent_1 {
   text-indent: 5px;
 }
-&#10;#pdrsguddwh .gt_indent_2 {
+&#10;#oixwtgyfdj .gt_indent_2 {
   text-indent: 10px;
 }
-&#10;#pdrsguddwh .gt_indent_3 {
+&#10;#oixwtgyfdj .gt_indent_3 {
   text-indent: 15px;
 }
-&#10;#pdrsguddwh .gt_indent_4 {
+&#10;#oixwtgyfdj .gt_indent_4 {
   text-indent: 20px;
 }
-&#10;#pdrsguddwh .gt_indent_5 {
+&#10;#oixwtgyfdj .gt_indent_5 {
   text-indent: 25px;
 }
-&#10;#pdrsguddwh .katex-display {
+&#10;#oixwtgyfdj .katex-display {
   display: inline-flex !important;
   margin-bottom: 0.75em !important;
 }
-&#10;#pdrsguddwh div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
+&#10;#oixwtgyfdj div.Reactable > div.rt-table > div.rt-thead > div.rt-tr.rt-tr-group-header > div.rt-th-group:after {
   height: 0px !important;
 }
 </style>
@@ -601,7 +603,7 @@ I also could have chosen to weight some *variables* more than others in the orig
 Number 3. Use of 5 Predictors in Every State
 </h3>
 
-Regardless of the `\(R^2\)` variables for the predictors in each state, I decided to use five predictors. In a future iteration of this model I could parameterize the number of predictor variables used in each state, either (1) selecting all of those features with an `\(R^2\)` value above some certain threshold (and only those features), (2) selecting predictors until the marginal returns on each state model’s accuracy is below some threshold, or (3) training models using different numbers of predictors (3, 4, 5, 6, etc.) and selecting those that have the best accuracy overall. To assess accuracy, I would keep some years in a training set and others in a test set and use out-of-sample error because, in predicting an election, we can’t use error based on the “truth” until the election occurs.
+Regardless of the R<sup>2</sup> variables for the predictors in each state, I decided to use five predictors. In a future iteration of this model I could parameterize the number of predictor variables used in each state, either (1) selecting all of those features with an R<sup>2</sup> value above some certain threshold (and only those features), (2) selecting predictors until the marginal returns on each state model’s accuracy is below some threshold, or (3) training models using different numbers of predictors (3, 4, 5, 6, etc.) and selecting those that have the best accuracy overall. To assess accuracy, I would keep some years in a training set and others in a test set and use out-of-sample error because, in predicting an election, we can’t use error based on the “truth” until the election occurs.
 
 <h3>
 Number 4. Collinearity
@@ -610,10 +612,10 @@ Number 4. Collinearity
 We can see that some of the predictors, particularly demographic predictors, are highly correlated with each other. This is a common result when working with highly dimensional data. To reduce collinearity, I could apply regularization, either LASSO or Ridge. This is similar to the previous method of limiting the predictors in each state. But the previous method would not solely reduce dimensionality in all states… in some, it would probably increase dimensionality. To remove features associated with each other, LASSO and Ridge regularization penalize predictors by adding a penalty term to their sum of squared residuals, and then removing the features with the highest penalties plus squared residual sums. The penalty is based on a sum of the coefficients in the model. These regularization techniques reduce bias in the model by removing those terms with high sums of squared residuals, but the presence of the penalty term allows them to remove more features, the higher the dimension of the data.
 
 <h3>
-Number 5. Reliance on `\(R^2\)` Statistic
+Number 5. Reliance on R<sup>2</sup> Statistic
 </h3>
 
-`\(R^2\)` is the proportion of variance in the dependent variable explained by variance in the independent variable. But the interpretation of `\(R^2\)` changes when there are multiple predictors in a model. Similarly, the value of `\(R^2\)` for each respective predictor changes as the number of predictors in the model changes. Other statistics I could have used to select predictor variables to use in my models could have been the statistical significance (p-value) of their coefficient in the regression model, or I could have relied on a traditional regularization method (as described in the section above).
+R<sup>2</sup> is the proportion of variance in the dependent variable explained by variance in the independent variable. But the interpretation of R<sup>2</sup> changes when there are multiple predictors in a model. Similarly, the value of R<sup>2</sup> for each respective predictor changes as the number of predictors in the model changes. Other statistics I could have used to select predictor variables to use in my models could have been the statistical significance (p-value) of their coefficient in the regression model, or I could have relied on a traditional regularization method (as described in the section above).
 
 Overall, much of my model’s inaccuracy can be attributed to my goal of creating a *generalizeable* model to predict the 2024 Presidential Election outcome in each of the 50 states. Had I set out with a unique approach to predicting each state, potentially crafting 50 very different models, using different features, I may have wound up with different and/or better results.
 
