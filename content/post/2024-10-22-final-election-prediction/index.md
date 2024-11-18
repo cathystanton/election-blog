@@ -11,6 +11,8 @@ slug: "final-election-prediction"
 <script src="{{< blogdown/postref >}}index_files/pagedtable/js/pagedtable.js"></script>
 <link href="{{< blogdown/postref >}}index_files/pagedtable/css/pagedtable.css" rel="stylesheet" />
 <script src="{{< blogdown/postref >}}index_files/pagedtable/js/pagedtable.js"></script>
+<link href="{{< blogdown/postref >}}index_files/pagedtable/css/pagedtable.css" rel="stylesheet" />
+<script src="{{< blogdown/postref >}}index_files/pagedtable/js/pagedtable.js"></script>
 
 <h2>Final Predictive Model for the 2024 Election</h2>
 For my final election prediction, I performed OLS regressions for each state, based on the predictors that best explained each state's variance. I compiled a dataset with variables about candidate performance since 1972, as well as demographic data, economic data, historical turnout trends, ad spending, and polling, in each state. Then I fit an OLS model to each state, on all of the features, and chose the 5 with the highest `\(R^2\)` values. The `\(R^2\)` statistic measures how much variation in an outcome (like democratic vote share) can be explained by the given predictor. So by choosing to build a linear model based on predictors with high `\(R^2\)` values in each state, I hope to use the least possible predictors to capture the most possible nuance in each state.  
@@ -58,4 +60,16 @@ As was the case with some of the predictions, some of the errors are particularl
 There are a few odd-balls in the prediction set. For example, it suggests that Democrats could win 100% of the vote in Maryland (unrealistic), 83% of the vote in Wisconsin, 79% of the vote in Texas, 29% of the vote in Colorado, and 26% of the vote in New Jersey. This means that, for these states, this method of prediction or number of predictors is not the most well-suited. It is the price we pay for trying to fit one, standard model 50 diverse states with different populations, preferences, and trends.  
 Another reason for the odd predictions could be that this model incorporates temporal data, going back to 1972. The political landscape in 1972 was vastly different than today's, so using a metric of candidate success in a state in 1972, may not correspond to their success in 2024. The same is true even for more recent elections: the features that may have correlated with success, or share of the vote in a state, in 200 or 2008 may not correlate with the share of the vote today.  
 With extra time and ever-accessible data, I would look into building individualized models for the states that appear problematic in this forecast. However, this was an attempt at abstraction--defining one general model with a set of rules that could be applied to all states--while still accounting for some of the individual nuances between states. I'm interested to see how this model performs for the states that, at first glance, it seems to predict reasonably (i.e. Georgia, New Hampshire, Arizona, Florida).
+
+
+
+```r
+paged_table(as.data.frame(cbind(unique(big_data$state), as.vector(state_predictors))))
+```
+
+<div data-pagedtable="false">
+  <script data-pagedtable-source type="application/json">
+{"columns":[{"label":["V1"],"name":[1],"type":["list"],"align":["right"]},{"label":["V2"],"name":[2],"type":["list"],"align":["right"]}],"data":[{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"},{"1":"<chr [1]>","2":"<int [5]>"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
 
