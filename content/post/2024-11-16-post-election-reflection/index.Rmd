@@ -10,10 +10,10 @@ tags: []
 <h2>Recap of my 2024 Presidential Election Forecast Model</h2>
 This semester, I explored a variety of indicators and datasets week-to-week to predict the outcome of the 2024 U.S. Presidential Election. Most posts on this blog used one *type* of data (e.g. economic, polling, demographic, advertising) to predict the election outcome. For my final model, I chose to amalgamate data from across these sets into one big dataset, and then run a regression on each state, to see which predictors were most effective in explaining variance in Democratic Vote Share over time, based on their value for $R^2$. Then in each state, I fit a new multilinear regression just using the top 5 most predictive variables and predicted Democratic Vote Share based on that. For some variables, data comes from as far back as 1972. In creating a 2024 dataset to predict on, I had to use some *projected* metrics, which may have influenced my model's accuracy (for example, I had to use projected demographic data since the last Census was conducted in 2020, and I had to use *projected turnout*, from the political scientist Michael McDonald's prediction, because there did not exist *actual* turnout data for 2024 when I was making my prediction). My model did not make a prediction for Washington D.C. due to a lack of data, nor did it predict the national popular vote share, but it did generate percentages of the Democratic Vote Share in every state. 
 
-<h2>Results and Accuracy of the Model<h2>
+<h2>Results and Accuracy of the Model</h2>
 The table below shows each state's projected Democratic Vote Share (DVS) next to its actual, observed Democratic Vote Share in the 2024 Election. Cells with a DVS below 50% are shaded *red* because a Republican would have won them and cells with a DVS above 50% are shaded *blue.*  
 
-```{r}
+```{r, echo=F, warning=F, message=F}
 library(gt)
 library(dplyr)
 
@@ -36,13 +36,14 @@ library(ggplot2)
 
 state_map <- map_data("state")
 
-# preds_vs_results %>%
-  # mutate(state = tolower(state)) %>%
-  # full_join(state_map, by=join_by(state==region)) %>%
-  # ggplot(aes(lat, long)) +
-  # facet_wrap(vars(c("predicted D2PV", "actual D2PV"))) +
-  # geom_polygon() +
-  # theme_void()
+preds_vs_results %>%
+  mutate(state = tolower(state)) %>%
+  full_join(state_map, by=join_by(state==region)) %>%
+  select(-`actual D2PV`) %>%
+  ggplot(aes(long, lat)) +
+    geom_polygon(aes(fill=`predicted D2PV`), color="white") +
+    theme_void()
+
 ```
 <h2>Hypotheses of Inaccuracy<h2>
 <h3>Number 1. Historical Trends</h3>
