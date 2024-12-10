@@ -6,8 +6,15 @@
     <description>Recent content in Home on GOV 1347: Election Analytics Blog</description>
     <generator>Hugo</generator>
     <language>en-us</language>
-    <lastBuildDate>Sat, 16 Nov 2024 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 25 Nov 2024 00:00:00 +0000</lastBuildDate>
     <atom:link href="http://localhost:4321/election-blog/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Post-Election Campaign Narrative</title>
+      <link>http://localhost:4321/election-blog/post/2024/11/25/post-election-campaign-narrative/</link>
+      <pubDate>Mon, 25 Nov 2024 00:00:00 +0000</pubDate>
+      <guid>http://localhost:4321/election-blog/post/2024/11/25/post-election-campaign-narrative/</guid>
+      <description>&lt;link href=&#34;http://localhost:4321/election-blog/election-blog/post/2024/11/25/post-election-campaign-narrative/index_files/pagedtable/css/pagedtable.css&#34; rel=&#34;stylesheet&#34; /&gt;&#xA;&lt;script src=&#34;http://localhost:4321/election-blog/election-blog/post/2024/11/25/post-election-campaign-narrative/index_files/pagedtable/js/pagedtable.js&#34;&gt;&lt;/script&gt;&#xA;&lt;h2&gt;Post-Election Campaign Narrative&lt;/h2&gt;&#xA;In this post, I&#39;m going to do a deep dive on my home state, New York, and evaluate (1) how well the polls did in predicting its Democratic Vote Share and (2) whether state-specific campaigning impacted either Kamala Harris&#39; or Donald Trump&#39;s performance there.&#xA;&lt;h2&gt;Overview of New York State&lt;/h2&gt;&#xA;New York is the 4th largest state in the U.S. by population and ranked 30th in terms of land-area. Located in the Northeastern United States, it&#39;s generally considered part of the &#34;blue wall&#34; on American electoral maps. Southern New York--the New York City Metropolitan Area--is very densely populated, while the North and West of the state tend to be more rural, with the exception of cities in Ithaca, Syracuse, Rochester, and Buffalo, and the capitol in Albany. New York&#39;s population has decreased over time; it has lost seats in the House of Representatives and votes in the electoral college (most recently losing 1 seat/vote after the collection of the 2020 Census).  &#xA;&lt;p&gt;About 20% of New Yorkers identified as Hispanic/Latino in the &lt;a href=&#34;https://data.census.gov/profile/New_York?g=040XX00US36#race-and-ethnicity&#34;&gt;2020 Census&lt;/a&gt;. Of the remaining 80%, about 4% identified as having multiple racial identities, 65% (of 80%) identified as white, 17% identified as black or African American, 0.3% identified as American Indian or Native Alaskan, 12% identified as Asian or Pacific Islander, and 1.2% identified with another racial group.&lt;/p&gt;</description>
+    </item>
     <item>
       <title>Post-Election Reflection</title>
       <link>http://localhost:4321/election-blog/post/2024/11/16/post-election-reflection/</link>
