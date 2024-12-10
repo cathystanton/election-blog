@@ -23,7 +23,7 @@ In terms of education, 40.6% of New Yorkers have received a bachelor's degree or
 
 <iframe src="https://data.census.gov/vizwidget?g=010XX00US&amp;infoSection=Age and Sex" width="672" height="400px" data-external="1"></iframe><iframe src="https://data.census.gov/vizwidget?g=040XX00US36&amp;infoSection=Age and Sex" width="672" height="400px" data-external="1"></iframe>
 
-According to the [University of Florida's Election] Lab(https://election.lab.ufl.edu/2024-general-election-turnout/), the Voting Aged Population in New York State was 15,566,053	and the Voting Eligible Population was 13,867,180 in 2024. The state had a 57.87% turnout rate among eligible voters. The chart below shows how this compares to the turnout rate in New York State in Presidential Election Years since 1980.
+According to the [University of Florida's Election Lab](https://election.lab.ufl.edu/2024-general-election-turnout/), the Voting Aged Population in New York State was 15,566,053	and the Voting Eligible Population was 13,867,180 in 2024. The state had a 57.87% turnout rate among eligible voters. The chart below shows how this compares to the turnout rate in New York State in Presidential Election Years since 1980.
 
 
 <img src="{{< blogdown/postref >}}index_files/figure-html/unnamed-chunk-2-1.png" width="672" />
